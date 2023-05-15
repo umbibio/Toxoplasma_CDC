@@ -448,22 +448,24 @@ ggsave(filename="../Output/toxo_cdc/ME49_59/figures_paper/umap_extra_density.pdf
 
 ## box plot - distribution of cells within each phase
 rna.sds.data <- readRDS('../Input/toxo_cdc/rds_ME49_59/sc_rna_sds_data.rds')
+rna.sds.data$phase <- gsub("\\.", "", rna.sds.data$phase)
+rna.sds.data$phase <- factor(rna.sds.data$phase, levels = c("G1a", "G1b", "S", "M", "C"))
 
 p <- ggplot(rna.sds.data, aes(x=phase, y=pt.shifted.scaled, color  = phase)) + 
   geom_boxplot(size = 0.7) +
-  scale_color_manual(values = c("G1.a" = "#b6232a","G1.b" ='#ed7202', 'S' = '#caae05', 'M' = '#6f883a', 'C' = '#b138ee')) +
-  scale_fill_manual(values = c("G1.a" = "#b6232a","G1.b" ='#ed7202', 'S' = '#caae05', 'M' = '#6f883a', 'C' = '#b138ee')) +
+  scale_color_manual(values = c("G1a" = "#b6232a","G1b" ='#ed7202', 'S' = '#caae05', 'M' = '#6f883a', 'C' = '#b138ee')) +
+  scale_fill_manual(values = c("G1a" = "#b6232a","G1b" ='#ed7202', 'S' = '#caae05', 'M' = '#6f883a', 'C' = '#b138ee')) +
   theme_bw() +
   xlab('phase') + ylab("pseudo-time") +
   theme(axis.text.y = element_text( size = 18, face="bold", color = "black"),
         axis.text.x = element_text(size = 18, face="bold", color = "black"),
         plot.title = element_text(size=20, face = "bold.italic", color = 'black', hjust = 0.5),
-        axis.title.x = element_text(size=20, face="bold"),
-        axis.title.y = element_text(size=20, face="bold"),
+        axis.title.x = element_text(size=18, face="bold"),
+        axis.title.y = element_text(size=18, face="bold"),
         legend.title  = element_text(size = 20, face = "bold"),
         legend.text = element_text(size =  "18", face = "bold", color = "black"),
         strip.background = element_rect(colour="black", fill="white",size=0.5, linetype="solid")) +
-  ggtitle("scRNA")
+  theme(legend.position = "none")
 
 p
 
