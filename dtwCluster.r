@@ -266,6 +266,7 @@ trans.list <- lapply(1:length(rna.trans.marker.genes.list), function(i) {
 names(trans.list) <- names(rna.trans.marker.genes.list)
 saveRDS(trans.list, "../Input/toxo_cdc/rds_ME49_59/rna_markers_rna_transitions_dtw_clust_list.rds")
 
+
 pp <- grid.arrange(grobs = trans.list, ncol = 2)
 
 ggsave( "../Output/toxo_cdc/ME49_59/figures_paper/rna_markers_rna_transitions_dtw_clust_list.pdf", 
@@ -552,5 +553,89 @@ dev.off()
 pp <- grid.arrange(grobs = trans.list, ncol = 2)
 ggsave(plot = pp , "../Output/toxo_cdc/ME49_59/figures_paper/dtw_clust_matched_rna_atac_transition.pdf",
     width = 12, height = 14, dpi = 300)
+
+############################################################################################
+## rna transition markers with ordered clusters based on the peak (visually inspected)
+############################################################################################
+
+plot_rna_atac_trends <- function(sc.rna.sc.atac.joint.long.sub){
+  p  <- ggplot(sc.rna.sc.atac.joint.long.sub, aes(x= time,y=normExpr)) +
+    geom_path(aes(color = GeneID),alpha = 0.8, size = 0.8)+ 
+    theme_bw() +
+    #theme_bw(base_size = 16) +
+    theme(legend.position = "right") +
+    ylab('normExpr') + xlab('Time') +
+    theme(axis.text.x = element_text(angle = 0, hjust = 1, size = 22, face="bold", colour = "black")) +
+    theme(axis.text.y = element_text(angle = 0, hjust = 1, size = 18, face="bold", colour = "black")) +
+    theme(strip.background = element_rect(colour="black", fill="white",size=0.5, linetype="solid")) +
+    theme(strip.text = element_text(size = 22, face="bold", angle = 0)) + 
+    
+    coord_cartesian(xlim = c(0,6.5)) + 
+    facet_grid(cluster.RNA.ordered ~ data, scales = 'free', space = 'free') +
+    theme(
+      plot.title = element_text(size=20, face = "bold.italic", color = 'red'),
+      axis.title.x = element_text(size=22, face="bold", hjust = 1),
+      axis.title.y = element_text(size=22, face="bold")
+    ) + 
+    theme(#legend.position = c(0.15, 0.85),
+      legend.position = 'none',
+      legend.title = element_text(colour="black", size=12, 
+                                  face="bold"),
+      legend.text = element_text(colour="black", size=12, 
+                                 face="bold"))
+  
+  
+  return(p)
+  
+}
+
+
+rna.trans.marker.genes.list <- readRDS("../Input/toxo_cdc/rds_ME49_59/rna_markers_rna_transitions_dtw_clust_list.rds")
+rna.trans.data.list <- lapply(rna.trans.marker.genes.list, "[[", 1)
+rna.trans.data <- do.call("rbind", rna.trans.data.list)
+
+rna.trans.data <- rna.trans.data %>% 
+  mutate(new.ord.clust = 
+           case_when(group == "T1" & cluster.RNA == "C 1" ~ "D4",
+                     group == "T1" & cluster.RNA == "C 2" ~ "D2", 
+                     group == "T1" & cluster.RNA == "C 3" ~ "D3", 
+                     group == "T1" & cluster.RNA == "C 4" ~ "D1",
+                     group == "T2" & cluster.RNA == "C 1" ~ "D4",
+                     group == "T2" & cluster.RNA == "C 2" ~ "D2", 
+                     group == "T2" & cluster.RNA == "C 3" ~ "D1", 
+                     group == "T2" & cluster.RNA == "C 4" ~ "D3", 
+                     group == "T3" & cluster.RNA == "C 1" ~ "D4",
+                     group == "T3" & cluster.RNA == "C 2" ~ "D3",
+                     group == "T3" & cluster.RNA == "C 3" ~ "D2", 
+                     group == "T3" & cluster.RNA == "C 4" ~ "D1", 
+                     group == "T4" & cluster.RNA == "C 1" ~ "D3", 
+                     group == "T4" & cluster.RNA == "C 2" ~ "D4", 
+                     group == "T4" & cluster.RNA == "C 3" ~ "D1", 
+                     group == "T4" & cluster.RNA == "C 4" ~ "D2", 
+                     TRUE ~ "NA"))
+rna.trans.data$cluster.RNA.ordered <- gsub("\\D", "C", rna.trans.data$new.ord.clust) 
+rna.trans.data$data <- factor(rna.trans.data$data, levels = c("scRNA", "scATAC"))
+rna.trans.data.list <- split(rna.trans.data, f= rna.trans.data$group)
+#saveRDS(rna.trans.data.list, "../Input/toxo_cdc/rds_ME49_59/rna_markers_rna_transitions_dtw_clust_list_ordered.rds")
+
+trans.plt <- c()
+trans.plt <- lapply(1:length(rna.trans.data.list), function(i) {
+  
+  my.df <- rna.trans.data.list[[i]]
+  
+  p1 <- plot_rna_atac_trends(my.df) 
+  # +
+  #   ggtitle(names(rna.trans.marker.genes.list[i]))
+  p1
+  #tt <- list(df, p1)
+})
+
+pp <- grid.arrange(grobs = trans.plt, ncol = 2)
+
+ggsave( "../Output/toxo_cdc/ME49_59/figures_paper/rna_markers_rna_transitions_dtw_clust_list_ordered.pdf", 
+        plot = pp,
+        height = 16,width = 16, dpi = 300)
+
+
 
 
