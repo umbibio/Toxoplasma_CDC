@@ -328,7 +328,7 @@ HC.peaks <- HC.peaks %>% filter(dir == "down_reg")
 colnames(HC.peaks) <- gsub("ProductDescription.x", "ProductDescription", colnames(HC.peaks))
 
 HC.peaks$gene_name <- gsub("_", "-", HC.peaks$gene_name) 
-HC.peaks.clust <- clust.df(HC.peaks, num.clust = 3)
+HC.peaks.clust <- clust.df(HC.peaks, num.clust = 2)
 HC.peaks.clust <- HC.peaks.clust[HC.peaks.clust$data == "scRNA",]
 p <- plot_rna_atac_trends(HC.peaks.clust) 
 p
