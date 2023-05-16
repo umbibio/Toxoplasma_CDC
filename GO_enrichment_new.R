@@ -221,20 +221,20 @@ p <- ggplot(filtered.Go, aes(x = cluster, y = Name)) +
   scale_fill_manual(values = c("downReg" = "#6565bf","upReg" ='#ee5d6c'))+
   #scale_colour_gradient(limits=c(0, 0.01), low="red") +
   ylab(NULL) + xlab(NULL) + 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10, face="bold")) + 
-  theme(axis.text.y = element_text(angle = 0, hjust = 1, size = 10, face="bold")) +
+  theme(axis.text.x = element_text(angle = 0,colour = "black",hjust = 0.5, size = 14, face="bold", )) + 
+  theme(axis.text.y = element_text(angle = 0,colour = "black" ,size = 12, hjust = 1, face="bold")) +
   #theme(legend.position="none") +
   theme(strip.background = element_rect(colour="black", fill="white", 
                                         size=0.5, linetype="solid")) + guides(color = FALSE)+
   #ggtitle(strsplit(in.dir,split = "/")[[1]][5]) +
-  ggtitle("High Conf CutRun peaks Global DEGs in KD_vs_WT")+
+  #ggtitle("High Conf CutRun peaks Global DEGs in KD_vs_WT")+
   theme(plot.title = element_text(size = 9))
 
 plot(p)
 
 ggsave(filename="../Output/toxo_cdc/ME49_59/tables/all_GO/HighConfPeaks_globalDEG_GO_term.pdf",
        plot=p ,
-       width = 8, height = 8,
+       width = 9, height = 9,
        units = "in", # other options are "in", "cm", "mm"
        dpi = 300
 )

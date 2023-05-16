@@ -30,9 +30,9 @@ Cyclic.AP2s <- Cyclic.AP2s %>% dplyr::select(GeneID, ProductDescription, cyclic)
   filter(cyclic == 1) %>% filter(grepl("^AP2",ProductDescription ))
 
 Cyclic.AP2s$Name <- unlist(lapply(str_split(Cyclic.AP2s$ProductDescription,pattern = " "), "[[", 5))
-write.xlsx(Cyclic.AP2s, "../Input/Toxo_genomics/genes/Cyclic_AP2s_review_paper.xlsx")
+#write.xlsx(Cyclic.AP2s, "../Input/Toxo_genomics/genes/Cyclic_AP2s_review_paper.xlsx")
 
-## 
+ 
 
 rna_sub <- readRDS('../Input/toxo_cdc/rds_ME49_59/S.O_intra_lables_pt.rds')
 atac_sub <- readRDS('../Input/toxo_cdc/rds_ME49_59/S.O_intra_atac_lables_pt.rds')
@@ -65,7 +65,7 @@ sc.atac.mu.scale <- sc.atac.dtw.wide %>%
 sc.rna.AP2 <- sc.rna.dtw.wide[,colnames(sc.rna.dtw.wide) %in% Cyclic.AP2s$GeneID ]
 sc.atac.AP2 <- sc.atac.dtw.wide[,colnames(sc.atac.dtw.wide) %in% Cyclic.AP2s$GeneID ]
 
-sc.rna.AP2.markers.hc_dtw <- dtwClustCurves(sc.rna.AP2, nclust = 4L)
+sc.rna.AP2.markers.hc_dtw <- dtwClustCurves(sc.rna.AP2, nclust = 5L)
 sc.atac.AP2.markers.hc_dtw <- dtwClustCurves(sc.atac.AP2, nclust = 4L)
 
 plot(sc.rna.AP2.markers.hc_dtw, type = 'sc')
@@ -105,6 +105,9 @@ sc.rna.sc.atac.joint.long$cluster.RNA <- paste('C', sc.rna.sc.atac.joint.long$cl
 
 saveRDS(sc.rna.sc.atac.joint.long, '../Input/toxo_cdc/rds_ME49_59/Cyclic_33_AP2s_sc_rna_sc_atac_dtw_4_clust.rds')
 #saveRDS(sc.rna.sc.atac.joint.long, '../Input/toxo_cdc/rds_ME49_59/Cyclic_33_AP2s_sc_rna_sc_atac_dtw_5_clust.rds')
+
+
+########### plot ##########
 
 plot_rna_atac_trends <- function(sc.rna.sc.atac.joint.long.sub){
   p  <- ggplot(sc.rna.sc.atac.joint.long.sub, aes(x= time,y=normExpr)) +
@@ -150,6 +153,8 @@ plot_rna_atac_trends <- function(sc.rna.sc.atac.joint.long.sub){
   
 }
 
+sc.rna.sc.atac.joint.long <- readRDS('../Input/toxo_cdc/rds_ME49_59/Cyclic_33_AP2s_sc_rna_sc_atac_dtw_5_clust.rds')
+sc.rna.sc.atac.joint.long$data <- factor(sc.rna.sc.atac.joint.long$data, levels = c("scRNA", "scATAC"))
 p1 <- plot_rna_atac_trends(sc.rna.sc.atac.joint.long)
 
 plot(p1)
