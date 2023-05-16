@@ -7,40 +7,119 @@ names(tab)[1] <- "chr"
 
 
 ## DEGs KD vs WT phase based 
-
-# phase based
 KD.vs.WT.phase <- tab %>% dplyr::select(gene_name, KD_vs_WT_phase_based) %>% 
   filter(KD_vs_WT_phase_based != "NA") %>% distinct()
-
-# global 
-KD.vs.WT.glob <- tab %>% dplyr::select(gene_name, Global_KD_vs_WT) %>% 
-  filter(Global_KD_vs_WT != "NA") %>% distinct()
-
+dim(KD.vs.WT.phase)
 
 # cutRun genes in intersection of 4 data
 intrsct.peaks  <- tab %>% dplyr::select(gene_name, intersection) %>% 
   distinct() %>% filter(intersection == "yes")
+dim(intrsct.peaks)
 
-
-DEGs <- KD.vs.WT.glob
+## overlap - venn
 DEGs <- KD.vs.WT.phase
+venn.list <- list(KD.vs.WT = unique(DEGs$gene_name), 
+                  High.Conf.Peaks = intrsct.peaks$gene_name)
 
+p <- ggVennDiagram(venn.list, set_size = 6, label_size = 8) 
+p
+ggsave("../Output/toxo_cdc/ME49_59/figures_paper/High_Conf_CutRun_peaks_phase_based_DEGs_KD_vs_WT_Venn.pdf",
+       plot = p, width = 6, height = 6, dpi = 300)
+
+HC.peaks <- tab %>% 
+  filter(intersection == "yes" & KD_vs_WT_phase_based %in% c('down_reg', 'up_reg', 'modulated') ) %>% 
+  dplyr::select(chr, start_peak, end_peak, V4, V5, V11,gene_name,intersection, KD_vs_WT_phase_based,ProductDescription.x , Category ) %>% 
+  distinct()
+names(HC.peaks)[9] <- "dir"
+
+
+## summary and bar plot
+HC.peaks.stat <- HC.peaks %>% group_by(dir, Category) %>%
+  summarise(total = n())
+
+HC.peaks.stat <- HC.peaks.stat %>% 
+  mutate(Color  = ifelse(dir == "down_reg", "#8080FA", "#fc6c85"))
+
+HC.peaks.stat <- HC.peaks.stat %>%
+  mutate( ## for this you will need to remove the whitespace 
+    Category = stringr::str_trim(Category),
+    newcolor = ifelse(grepl("ribo", Category), alpha(Color, .5), Color)
+  ) 
+
+#
+sum(HC.peaks.stat$total)
+
+p <- ggplot(HC.peaks.stat, aes(dir, total)) +
+  geom_col(aes(fill = I(newcolor), color = Category),
+           position = position_stack(reverse = FALSE),
+           ##remove the border 
+           linewidth = 0) +
+  geom_text(aes(label = total, group = Category),size = 8, color = "black",
+            fontface = 'bold', position = position_stack(vjust = .5, reverse = FALSE)) +
+  ## change the legend fill manually 
+  guides(color = guide_legend(
+    reverse = FALSE,
+    #override.aes = list(fill = c("#fc6c85", alpha("#fc6c85", .5)), reverse = T))
+    override.aes = list(fill = c("grey25", alpha("grey25", .5))))
+  ) +
+  #theme(legend.position = "none") +
+  theme_bw()+
+  theme(
+    axis.text.x = element_text(size = 16, face = "bold", colour = "black"),
+    #axis.text.y = element_text(size = 10),
+    axis.text.y = element_text(size = 14, face = "bold", colour = "black"),
+    axis.ticks = element_blank())+
+  theme(strip.background=element_rect(fill='black', color = 'black'),
+        panel.spacing = unit(1.5, "lines"), 
+        strip.text.x=element_text(angle=0, hjust=0.5,vjust=0.5, size = 14,face = 'bold'),
+        plot.title = element_text(size=16, face = "bold.italic", color = 'black'),
+        axis.title.x = element_text(size=22, face="bold"),
+        axis.title.y = element_text(size=22, face="bold"))+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        #panel.border = element_blank(),
+        panel.spacing = unit(0.5, "lines"),
+        strip.text = element_text(face = "bold", size = 24,  angle = 0), 
+        strip.placement = "outside") +
+  theme(legend.text = element_text(face = "bold", size = 14),
+        legend.title = element_text(face = "bold", size = 16))+
+  theme(panel.spacing = unit(1.5, "lines")) +
+  theme(axis.line = element_line(colour = "black"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank()) 
+#theme(legend.position = "none")
+p
+
+ggsave("../Output/toxo_cdc/ME49_59/figures_paper/High_Conf_CutRun_peaks_phase_based_DEGs_KD_vs_WT_ribo_stacked.pdf", 
+       plot = p, width = 6, height = 4, dpi = 300)
+
+####################################################
+tab <- readRDS("../Input/toxo_cdc/rds_ME49_59/cut_run_union_new_peaks_march_motif_modulated_genes_lfs_v4.rds")
+
+# DEGs KD vs WT global 
+KD.vs.WT.glob <- tab %>% dplyr::select(gene_name, Global_KD_vs_WT) %>% 
+  filter(Global_KD_vs_WT != "NA") %>% distinct()
+dim(KD.vs.WT.glob)
+
+intrsct.peaks  <- tab %>% dplyr::select(gene_name, intersection) %>% 
+  distinct() %>% filter(intersection == "yes")
+dim(intrsct.peaks)
+
+## overlap - venn
+DEGs <- KD.vs.WT.glob
 venn.list <- list(KD.vs.WT = unique(DEGs$gene_name), 
                   High.Conf.Peaks = intrsct.peaks$gene_name)
 
 p <- ggVennDiagram(venn.list, set_size = 6, label_size = 8) 
 p
 
-
-ggsave("../Output/toxo_cdc/ME49_59/figures_paper/High_Conf_CutRun_peaks_phase_based_DEGs_KD_vs_WT_Venn.pdf",
-       plot = p, width = 6, height = 6, dpi = 300)
-
 ggsave("../Output/toxo_cdc/ME49_59/figures_paper/High_Conf_CutRun_peaks_global_DEGs_KD_vs_WT_Venn.pdf",
        plot = p, width = 6, height = 6, dpi = 300)
 
 
 ## new version of venn 
-
 library(VennDiagram)
 pdf(file = "../Output/toxo_cdc/ME49_59/figures_paper/cut_run_union_peaks_overlap_atac_peaks_venn.pdf")
 venn.plot <- draw.pairwise.venn(
@@ -62,17 +141,9 @@ venn.plot <- draw.pairwise.venn(
 
 dev.off()
 
-
-##################################################
 ## fig 12 C
 ## bar plot 
 tab <- readRDS("../Input/toxo_cdc/rds_ME49_59/cut_run_union_new_peaks_march_motif_modulated_genes_lfs_v4.rds")
-# phase based
-HC.peaks <- tab %>% 
-  filter(intersection == "yes" & KD_vs_WT_phase_based %in% c('down_reg', 'up_reg', 'modulated') ) %>% 
-  dplyr::select(chr, start_peak, end_peak, V4, V5, V11,gene_name,intersection, KD_vs_WT_phase_based,ProductDescription.x , Category ) %>% 
-  distinct()
-names(HC.peaks)[9] <- "dir"
 
 # global
 HC.peaks <- tab %>% 
@@ -141,8 +212,6 @@ p <- ggplot(HC.peaks.stat, aes(dir, total)) +
   #theme(legend.position = "none")
 p
 
-ggsave("../Output/toxo_cdc/ME49_59/figures_paper/High_Conf_CutRun_peaks_phase_based_DEGs_KD_vs_WT_ribo_stacked.pdf", 
-       plot = p, width = 6, height = 4, dpi = 300)
 
 ggsave("../Output/toxo_cdc/ME49_59/figures_paper/High_Conf_CutRun_peaks_global_DEGs_KD_vs_WT_ribo_stacked.pdf", 
        plot = p, width = 5, height = 4, dpi = 300)
@@ -169,9 +238,29 @@ ggsave("../Output/toxo_cdc/ME49_59/figures_paper/High_Conf_CutRun_peaks_global_D
 #        plot = p, width = 4, height = 4, dpi = 300)
 
 
-
+###############################################################
 ## write fasta file (cut and run regions) for high conf peaks 
+## write the genes in excel file for GO term analysis on toxodb
+###############################################################
+tab <- readRDS("../Input/toxo_cdc/rds_ME49_59/cut_run_union_new_peaks_march_motif_modulated_genes_lfs_v4.rds")
+
+# phase based 
+HC.peaks <- tab %>% 
+  filter(intersection == "yes" & KD_vs_WT_phase_based %in% c('down_reg', 'up_reg', 'modulated') ) %>% 
+  dplyr::select(chr, start_peak, end_peak, V4, V5, V11,gene_name,intersection, KD_vs_WT_phase_based,ProductDescription.x , Category ) %>% 
+  distinct()
+names(HC.peaks)[9] <- "dir"
+
+# global
+HC.peaks <- tab %>% 
+  filter(intersection == "yes" & Global_KD_vs_WT %in% c('down_reg', 'up_reg') ) %>% 
+  dplyr::select(chr, start_peak, end_peak, V4, V5, V11,gene_name,intersection, Global_KD_vs_WT,ProductDescription.x , Category ) %>% 
+  distinct()
+names(HC.peaks)[9] <- "dir"
+
+
 HC.peaks.list <- split(HC.peaks, f = HC.peaks$dir)
+
 #DEG.type <- "KD_vs_WT_phase_based"
 DEG.type <- "KD_vs_WT_global"
 
