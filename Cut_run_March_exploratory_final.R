@@ -3,6 +3,7 @@
 ## 1. peaks in the intersection Overlap with up and down regulated genes in WT vs KD 
 tab <- readRDS("../Input/toxo_cdc/rds_ME49_59/cut_run_union_new_peaks_march_motif_modulated_genes_lfs_v4.rds")
 names(tab)[1] <- "chr"
+#saveRDS(tab, "../Input/toxo_cdc/rds_ME49_59/cut_run_union_new_peaks_march_motif_modulated_genes_lfs_v4.rds")
 
 
 ## DEGs KD vs WT phase based 
@@ -63,7 +64,9 @@ dev.off()
 
 
 ##################################################
-
+## fig 12 C
+## bar plot 
+tab <- readRDS("../Input/toxo_cdc/rds_ME49_59/cut_run_union_new_peaks_march_motif_modulated_genes_lfs_v4.rds")
 # phase based
 HC.peaks <- tab %>% 
   filter(intersection == "yes" & KD_vs_WT_phase_based %in% c('down_reg', 'up_reg', 'modulated') ) %>% 
@@ -101,15 +104,17 @@ p <- ggplot(HC.peaks.stat, aes(dir, total)) +
            ##remove the border 
            linewidth = 0) +
   geom_text(aes(label = total, group = Category),size = 8, color = "black",
-            fontface = 'bold', position = position_stack(vjust = .5, reverse = TRUE)) +
+            fontface = 'bold', position = position_stack(vjust = .5, reverse = FALSE)) +
   ## change the legend fill manually 
   guides(color = guide_legend(
     reverse = FALSE,
-    override.aes = list(fill = c("grey25", alpha("grey25", .5))))) +
+    #override.aes = list(fill = c("#fc6c85", alpha("#fc6c85", .5)), reverse = T))
+    override.aes = list(fill = c("grey25", alpha("grey25", .5))))
+    ) +
   #theme(legend.position = "none") +
   theme_bw()+
   theme(
-    axis.text.x = element_text(size = 14, face = "bold", colour = "black"),
+    axis.text.x = element_text(size = 16, face = "bold", colour = "black"),
     #axis.text.y = element_text(size = 10),
     axis.text.y = element_text(size = 14, face = "bold", colour = "black"),
     axis.ticks = element_blank())+
@@ -140,7 +145,7 @@ ggsave("../Output/toxo_cdc/ME49_59/figures_paper/High_Conf_CutRun_peaks_phase_ba
        plot = p, width = 6, height = 4, dpi = 300)
 
 ggsave("../Output/toxo_cdc/ME49_59/figures_paper/High_Conf_CutRun_peaks_global_DEGs_KD_vs_WT_ribo_stacked.pdf", 
-       plot = p, width = 6, height = 4, dpi = 300)
+       plot = p, width = 5, height = 4, dpi = 300)
 
 ## 
 # p <- ggplot(data=HC.peaks.stat, aes(x=dir, y=total, fill=Category)) +
@@ -193,10 +198,9 @@ cluster.bed.list <- lapply(1:length(HC.peaks.list), function(i){
 
 tab <- readRDS("../Input/toxo_cdc/rds_ME49_59/cut_run_union_new_peaks_march_motif_modulated_genes_lfs_v4.rds")
 
-
 tab.down.reg <- tab %>% 
-  dplyr::select(gene_name, has.motif, motif, Global_KD_vs_WT, ProductDescription.x, Category) %>%
-  filter(has.motif == "yes" & Global_KD_vs_WT == "down_reg" & motif %in% c("motif_1", "motif_2")) %>% distinct()
+  dplyr::select(intersection, gene_name, has.motif, motif, Global_KD_vs_WT, ProductDescription.x, Category) %>%
+  filter(intersection == "yes" , has.motif == "yes" & Global_KD_vs_WT == "down_reg" & motif %in% c("motif_1", "motif_2")) %>% distinct()
 
 tab.down.reg <- tab.down.reg %>% group_by(gene_name) %>% mutate(motif.list = list(motif)) 
 tab.down.reg <- tab.down.reg %>% rowwise() %>%
