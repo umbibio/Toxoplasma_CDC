@@ -26,21 +26,21 @@ source('./util_funcs.R')
 plot_rna_atac <- function(sc.rna.sc.atac.joint.long.sub){
   p  <- ggplot(sc.rna.sc.atac.joint.long.sub, aes(x= time,y=normExpr)) +
     geom_path(aes(color = GeneID),alpha = 0.8, size = 0.8)+ 
-    theme_bw(base_size = 14) +
+    theme_bw() +
     theme(legend.position = "right") +
     ylab('normExpr') + xlab('Time') +
-    theme(axis.text.x = element_text(angle = 0, hjust = 1, size = 12, face="bold")) +
-    theme(axis.text.y = element_text(angle = 0, hjust = 1, size = 12, face="bold")) +
+    theme(axis.text.x = element_text(angle = 0, size = 20, face="bold", colour = "black")) +
+    theme(axis.text.y = element_text(angle = 0, size = 20, face="bold", colour = "black")) +
     theme(strip.background = element_rect(colour="black", fill="white",
                                           size=0.5, linetype="solid")) +
-    theme(strip.text = element_text(size = 14, face="bold", angle = 0)) + 
+    theme(strip.text = element_text(size = 20, face="bold", angle = 0)) + 
     
     coord_cartesian(xlim = c(0,6.5)) + 
     facet_grid(. ~ data, scales = 'free', space = 'free') +
     theme(
       plot.title = element_text(size=14, face = "bold.italic", color = 'red'),
-      axis.title.x = element_text(size=14, face="bold", hjust = 1),
-      axis.title.y = element_text(size=14, face="bold")
+      axis.title.x = element_text(size=20, face="bold", hjust = 1),
+      axis.title.y = element_text(size=20, face="bold")
     ) + 
     theme(#legend.position = c(0.15, 0.85),
       legend.position = 'none',
@@ -131,10 +131,10 @@ expr.atac.tab <- get_rna_atac_profile(rna.splines = sc.rna.spline.fits,
 ## if you wan the atac profiles as well, then do not filter data == "scRNA
 expr.tab <- expr.atac.tab %>% filter(data == "scRNA")
 p1 <- plot_rna_atac(expr.tab)
-p1 <- p1 + ggtitle("ribosomals")
+#p1 <- p1 + ggtitle("ribosomals")
 p1 
 ggsave("../Output/toxo_cdc/ME49_59/figures_paper/High_conf_peaks_down_reg_Global_KD_vs_WT_ribosomal_No_clustering.pdf", 
-       plot = p1, height = 4, width = 6, dpi = 300)
+       plot = p1, height = 3, width = 6, dpi = 300)
 
 
 ## table of genes of interest
