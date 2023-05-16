@@ -38,6 +38,30 @@ ggsave("../Output/toxo_cdc/ME49_59/figures_paper/High_Conf_CutRun_peaks_global_D
        plot = p, width = 6, height = 6, dpi = 300)
 
 
+## new version of venn 
+
+library(VennDiagram)
+pdf(file = "../Output/toxo_cdc/ME49_59/figures_paper/cut_run_union_peaks_overlap_atac_peaks_venn.pdf")
+venn.plot <- draw.pairwise.venn(
+  area1 = nrow(DEGs),
+  area2 = nrow(intrsct.peaks),
+  cross.area = 49,
+  #category = c("ATAC", "C&R"),
+  fill = c("red", "lightgoldenrod2"),
+  lty = rep("solid", 2),
+  lwd = 4,
+  col = c("darkred", "lightgoldenrod4"),
+  cex = 4,
+  cat.cex = 3,
+  ext.length = 0.9,
+  ext.line.lwd = 2.5,
+  #ext.line.lty = "dashed"
+)
+#grid.draw(venn.plot);
+
+dev.off()
+
+
 ##################################################
 
 # phase based
