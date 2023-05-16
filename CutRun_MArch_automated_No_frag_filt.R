@@ -236,6 +236,8 @@ all.peaks.filt <- lapply(1:length(all.peaks), function(i){
 })
 names(all.peaks.filt) <- gsub("\\.narrowPeak", "", files)
 
+tmp <- do.call("rbind",all.peaks.filt[1:4])
+
 # peak gene union new data sets
 gtf.file <- "../Genomes/ToxoDB-59_TgondiiME49.gtf"
 gtf <- read.table(gtf.file, header = F, sep = '\t', quote = NULL)
@@ -444,20 +446,11 @@ saveRDS(CutRun.peaks.motif.chip,"../Input/toxo_cdc/rds_ME49_59/union_peaks_cut_r
 
 
 
-########### Overlap of cut and run peaks  with atac- venn diagram ########
+########### Overlap of cut and run peaks  with atac- venn diagram  ########
+########### after peak - gene assignment ##################################
 
-##  atac peaks (before peak gene assignments)
-# 
-# Tg_ATAC <- readRDS('../Input/toxo_cdc/rds_ME49_59/S.O_ATAC_peak.rds')
-# 
-# peak.regions <- data.frame(ATAC_peak_region = rownames(Tg_ATAC@assays$peaks@data))
-# peak.regions <- peak.regions %>% filter(!grepl("KE.*", ATAC_peak_region))
-# peak.regions.bed  <- data.frame(do.call(rbind, strsplit(peak.regions$ATAC_peak_region,"-")))
-# peak.regions.bed$X1 <- paste(peak.regions.bed$X1, peak.regions.bed$X2, sep = "_")
-# peaks.all.sort.atac <- peak.regions.bed  %>% dplyr::select(X1, X3, X4) %>%  arrange(X1, as.numeric(X3), as.numeric(X4))
-# names(peaks.all.sort.atac) <- c("V1", "V2", "V3")
-# peaks.all.sort.atac$V4 <- paste(paste(peaks.all.sort.atac$V1, peaks.all.sort.atac$V2, sep = ":"),peaks.all.sort.atac$V3 ,sep = "-" )
-
+## this is not the right way the next section is what we need #############
+##  atac peaks (after peak gene assignments)
 
 ## use the unique peaks that have been assigned to genes 
 peak.genes.bed.merged.bed <- read.table("../Input/toxo_scATAC_MJ_ME49_59/peak_gene_assigned_final.bed", sep = "\t")
@@ -469,7 +462,7 @@ nrow(peak.genes.bed.merged.bed)
 peak.genes.union.new <- readRDS( "../Input/toxo_cdc/rds_ME49_59/Union_all_new_peaks_0.05_qval_NO_frag_filt.rds")
 cut.run.peaks <- peak.genes.union.new$peak.gene.merged.bed[1:5] %>% distinct()
 nrow(cut.run.peaks)
-# cut.run.peaks <- peak.genes.union.new$peak.gene.merged.bed %>% ungroup() %>% 
+  # cut.run.peaks <- peak.genes.union.new$peak.gene.merged.bed %>% ungroup() %>% 
 #   dplyr::select(V1.x, start_peak, end_peak) %>% distinct()
 
 # overlap atac and cut RUN
@@ -503,3 +496,74 @@ grid.draw(venn.plot);
 
 dev.off()
 
+########### Overlap of cut and run peaks  with atac- venn diagram  ########
+########### befor peak - gene assignment ##################################
+
+in.dir <- "../Input/toxo_cdc/cutNrun/all_macs2_old_new_batch_NO_Filter/"
+files <- list.files(in.dir, pattern = ".narrowPeak")
+
+all.peaks <- list()
+for (f in files) {
+  tmp <- read.table(paste(in.dir, f, sep = ''), header=F, sep="\t", quote = NULL)
+  tmp <- tmp %>% filter(!grepl("KE.*", V1)) 
+  all.peaks <- c(all.peaks, list(tmp))
+}
+names(all.peaks) <- gsub("\\.narrowPeak", "", files)
+
+
+qval <- 0.05
+all.peaks.filt <- lapply(1:length(all.peaks), function(i){
+  cutRun <- all.peaks[[i]]
+  cutRun <- cutRun %>% filter(V9 > -log10(qval))
+})
+names(all.peaks.filt) <- gsub("\\.narrowPeak", "", files)
+all.peaks.filt.df <- do.call("rbind",all.peaks.filt[1:4])
+#tmp <- get_peak_genes_assign(all.peaks.filt.df, gtf = gtf, qval = 0.05)
+
+
+rownames(all.peaks.filt.df) <- NULL
+all.peaks.filt.df <- all.peaks.filt.df %>% transmute(V1 = V1, V2 = V2, V3 = V3, V4 = V4) 
+cut.run.peaks <- all.peaks.filt.df 
+
+#  atac peaks (before peak gene assignments)
+
+Tg_ATAC <- readRDS('../Input/toxo_cdc/rds_ME49_59/S.O_ATAC_peak.rds')
+
+peak.regions <- data.frame(ATAC_peak_region = rownames(Tg_ATAC@assays$peaks@data))
+peak.regions <- peak.regions %>% filter(!grepl("KE.*", ATAC_peak_region))
+peak.regions.bed  <- data.frame(do.call(rbind, strsplit(peak.regions$ATAC_peak_region,"-")))
+peak.regions.bed$X1 <- paste(peak.regions.bed$X1, peak.regions.bed$X2, sep = "_")
+peaks.all.sort.atac <- peak.regions.bed  %>% dplyr::select(X1, X3, X4) %>%  arrange(X1, as.numeric(X3), as.numeric(X4))
+names(peaks.all.sort.atac) <- c("V1", "V2", "V3")
+peaks.all.sort.atac$V4 <- paste(paste(peaks.all.sort.atac$V1, peaks.all.sort.atac$V2, sep = ":"),peaks.all.sort.atac$V3 ,sep = "-" )
+peak.genes.bed.merged.bed <- peaks.all.sort.atac
+
+# overlap atac and cut RUN
+options(bedtools.path = "/Users/kourosh.zarringhalam/miniconda3/bin/")
+peak.cutRun.atac.ovrlp <- bedtoolsr::bt.intersect(a = cut.run.peaks, b = peak.genes.bed.merged.bed, wb = T)
+
+
+library(VennDiagram)
+pdf(file = "../Output/toxo_cdc/ME49_59/figures_paper/cut_run_union_peaks_overlap_atac_peaks_venn_v2.pdf",
+    width = 12, height = 12)
+venn.plot <- draw.pairwise.venn(
+  area1 = nrow(cut.run.peaks),
+  area2 = nrow(peak.genes.bed.merged.bed),
+  cross.area = nrow(peak.cutRun.atac.ovrlp),
+  #category = c("ATAC", "C&R"),
+  fill = c("#F19F39", "#469C2C"),
+  lty = "blank",
+  cex = 5.5,
+  cat.cex = 3,
+  #cat.pos = c(285, 105),
+  #cat.dist = 0.09,
+  #cat.just = list(c(-1, -1), c(1, 1)),
+  #ext.pos = 30,
+  #ext.dist = -0.05,
+  ext.length = 0.9,
+  ext.line.lwd = 2.5,
+  #ext.line.lty = "dashed"
+)
+grid.draw(venn.plot);
+
+dev.off()
