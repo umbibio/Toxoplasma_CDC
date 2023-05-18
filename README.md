@@ -88,3 +88,6 @@ AP2XII-8 KD
   plots the circos for gene families
   the rds file has been generated in circosPlot.r
 
+22. plot_trends.r
+
+  plots the expression and atac profile of each gene one at a time
