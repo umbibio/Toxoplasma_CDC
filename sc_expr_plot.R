@@ -52,9 +52,9 @@ gene <- "TGME49_280460" # AP2VIIa-2
 gene <- "TGME49_269010" # AP2VIII-7
 gene <- "TGME49_214840" # AP2X-7
 
-gene <- "TGME49-233480"
+gene <- "TGME49_227600"
 
-  
+gene <- "TGME49_204530"  
 plot_expr_vln(S.O.rna.WT, S.O.rna.KD, geneID = gene, redc = "pca")
 
 
