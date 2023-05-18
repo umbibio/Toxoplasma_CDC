@@ -305,7 +305,7 @@ colnames(HC.peaks) <- gsub("ProductDescription.x", "ProductDescription", colname
 
 HC.peaks$gene_name <- gsub("_", "-", HC.peaks$gene_name) 
 HC.peaks.clust <- clust.df(HC.peaks, num.clust = 3)
-HC.peaks.clust <- HC.peaks.clust[HC.peaks.clust$data == "scRNA",]
+#HC.peaks.clust <- HC.peaks.clust[HC.peaks.clust$data == "scRNA",]
 p <- plot_rna_atac_trends(HC.peaks.clust) 
 p
 ggsave('../Output/toxo_cdc/ME49_59/figures_paper/High_conf_peaks_up_reg_KD_vs_WT_phase_based_3_clust.pdf', 
@@ -329,8 +329,8 @@ HC.peaks <- HC.peaks %>% filter(dir == "down_reg")
 colnames(HC.peaks) <- gsub("ProductDescription.x", "ProductDescription", colnames(HC.peaks))
 
 HC.peaks$gene_name <- gsub("_", "-", HC.peaks$gene_name) 
-HC.peaks.clust <- clust.df(HC.peaks, num.clust = 2)
-HC.peaks.clust <- HC.peaks.clust[HC.peaks.clust$data == "scRNA",]
+HC.peaks.clust <- clust.df(HC.peaks, num.clust = 3)
+#HC.peaks.clust <- HC.peaks.clust[HC.peaks.clust$data == "scRNA",]
 p <- plot_rna_atac_trends(HC.peaks.clust) 
 p
 
