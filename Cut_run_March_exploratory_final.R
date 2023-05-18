@@ -1,6 +1,9 @@
 
-
+## Fig 12  cut and run and DEGs
 ## 1. peaks in the intersection Overlap with up and down regulated genes in WT vs KD 
+
+## phase based ##
+
 tab <- readRDS("../Input/toxo_cdc/rds_ME49_59/cut_run_union_new_peaks_march_motif_modulated_genes_lfs_v4.rds")
 names(tab)[1] <- "chr"
 #saveRDS(tab, "../Input/toxo_cdc/rds_ME49_59/cut_run_union_new_peaks_march_motif_modulated_genes_lfs_v4.rds")
@@ -26,14 +29,73 @@ p
 ggsave("../Output/toxo_cdc/ME49_59/figures_paper/High_Conf_CutRun_peaks_phase_based_DEGs_KD_vs_WT_Venn.pdf",
        plot = p, width = 6, height = 6, dpi = 300)
 
+## new version of venn 
+
+library(VennDiagram)
+pdf(file = "../Output/toxo_cdc/ME49_59/figures_paper/cut_run_union_peaks_overlap_atac_peaks_venn_phase_based.pdf")
+venn.plot <- draw.pairwise.venn(
+  area1 = nrow(DEGs),
+  area2 = nrow(intrsct.peaks),
+  cross.area = 95,
+  #category = c("ATAC", "C&R"),
+  fill = c("red", "lightgoldenrod2"),
+  lty = rep("solid", 2),
+  lwd = 4,
+  col = c("darkred", "lightgoldenrod4"),
+  cex = 4,
+  cat.cex = 3,
+  ext.length = 0.9,
+  ext.line.lwd = 2.5,
+  #ext.line.lty = "dashed"
+)
+#grid.draw(venn.plot);
+
+dev.off()
+
+
+######### motifs summary ########
+## phase based 
+tab.down.reg <- tab %>% 
+  dplyr::select(intersection, gene_name, has.motif, motif, KD_vs_WT_phase_based, ProductDescription.x, Category) %>%
+  filter(intersection == "yes" , has.motif == "yes" & KD_vs_WT_phase_based == "down_reg" & motif %in% c("motif_1", "motif_2")) %>% distinct()
+
+
+tab.down.reg <- tab.down.reg %>% group_by(gene_name) %>% mutate(motif.list = list(motif)) 
+tab.down.reg <- tab.down.reg %>% rowwise() %>%
+  mutate(which_motif = ifelse(length(unlist(motif.list)) > 1 , "both" , "one")) %>% distinct()
+
+ind.one <- which(tab.down.reg$which_motif == "one")
+tab.down.reg$which_motif[ind.one] <- tab.down.reg$motif[ind.one]
+
+tab.sum <- tab.down.reg %>% group_by(which_motif, Category, KD_vs_WT_phase_based) %>% 
+  summarise(genes = list(unique(gene_name)), total = length(unique(gene_name)))
+
+tab.down.reg.uniq <- tab.down.reg %>%
+  dplyr::select(gene_name, has.motif, KD_vs_WT_phase_based, ProductDescription.x, Category, which_motif) %>%
+  distinct()
+write.xlsx(tab.down.reg.uniq, "../Output/toxo_cdc/ME49_59/tables/phase_based_KD_vs_WT_down_reg_motif1_motif2_occurence.xlsx")
+
+m1.v2 <- tab.down.reg %>% filter(motif %in% c("motif_1"))
+m2.v2 <- tab.down.reg %>% filter(motif %in% c( "motif_2"))
+
+ven.list <- list(motif_1 = unique(m1.v2$gene_name), motif_2 = unique(m2.v2$gene_name))
+p <- ggVennDiagram(ven.list, set_size = 6, label_size = 8)
+p <- p + ggtitle("down_reg") +theme(
+  plot.title = element_text(size=20, face = "bold.italic", color = 'red'))
+
+p
+ggsave("../Output/toxo_cdc/ME49_59/figures_paper/global_KD_vs_WT_down_reg_motif1_motif2_occurence_venn.pdf", 
+       plot = p, height = 6, width = 6, dpi = 300)
+
+
+## summary and bar plot
+
 HC.peaks <- tab %>% 
   filter(intersection == "yes" & KD_vs_WT_phase_based %in% c('down_reg', 'up_reg', 'modulated') ) %>% 
   dplyr::select(chr, start_peak, end_peak, V4, V5, V11,gene_name,intersection, KD_vs_WT_phase_based,ProductDescription.x , Category ) %>% 
   distinct()
 names(HC.peaks)[9] <- "dir"
 
-
-## summary and bar plot
 HC.peaks.stat <- HC.peaks %>% group_by(dir, Category) %>%
   summarise(total = n())
 
@@ -96,9 +158,10 @@ ggsave("../Output/toxo_cdc/ME49_59/figures_paper/High_Conf_CutRun_peaks_phase_ba
        plot = p, width = 6, height = 4, dpi = 300)
 
 ####################################################
+
+## KD vs WT global 
 tab <- readRDS("../Input/toxo_cdc/rds_ME49_59/cut_run_union_new_peaks_march_motif_modulated_genes_lfs_v4.rds")
 
-# DEGs KD vs WT global 
 KD.vs.WT.glob <- tab %>% dplyr::select(gene_name, Global_KD_vs_WT) %>% 
   filter(Global_KD_vs_WT != "NA") %>% distinct()
 dim(KD.vs.WT.glob)
@@ -141,11 +204,43 @@ venn.plot <- draw.pairwise.venn(
 
 dev.off()
 
-## fig 12 C
-## bar plot 
-tab <- readRDS("../Input/toxo_cdc/rds_ME49_59/cut_run_union_new_peaks_march_motif_modulated_genes_lfs_v4.rds")
 
-# global
+## mitifs summary 
+## global
+tab.down.reg <- tab %>% 
+  dplyr::select(intersection, gene_name, has.motif, motif, Global_KD_vs_WT, ProductDescription.x, Category) %>%
+  filter(intersection == "yes" , has.motif == "yes" & Global_KD_vs_WT == "down_reg" & motif %in% c("motif_1", "motif_2")) %>% distinct()
+
+
+tab.down.reg <- tab.down.reg %>% group_by(gene_name) %>% mutate(motif.list = list(motif)) 
+tab.down.reg <- tab.down.reg %>% rowwise() %>%
+  mutate(which_motif = ifelse(length(unlist(motif.list)) > 1 , "both" , "one")) %>% distinct()
+
+ind.one <- which(tab.down.reg$which_motif == "one")
+tab.down.reg$which_motif[ind.one] <- tab.down.reg$motif[ind.one]
+
+tab.sum <- tab.down.reg %>% group_by(which_motif, Category, Global_KD_vs_WT) %>% 
+  summarise(genes = list(unique(gene_name)), total = length(unique(gene_name)))
+
+tab.down.reg.uniq <- tab.down.reg %>%
+  dplyr::select(gene_name, has.motif, Global_KD_vs_WT, ProductDescription.x, Category, which_motif) %>%
+  distinct()
+write.xlsx(tab.down.reg.uniq, "../Output/toxo_cdc/ME49_59/tables/global_KD_vs_WT_down_reg_motif1_motif2_occurence.xlsx")
+
+m1.v2 <- tab.down.reg %>% filter(motif %in% c("motif_1"))
+m2.v2 <- tab.down.reg %>% filter(motif %in% c( "motif_2"))
+
+ven.list <- list(motif_1 = unique(m1.v2$gene_name), motif_2 = unique(m2.v2$gene_name))
+p <- ggVennDiagram(ven.list, set_size = 6, label_size = 8)
+p <- p + ggtitle("down_reg") +theme(
+  plot.title = element_text(size=20, face = "bold.italic", color = 'red'))
+
+p
+ggsave("../Output/toxo_cdc/ME49_59/figures_paper/global_KD_vs_WT_down_reg_motif1_motif2_occurence_venn.pdf", 
+       plot = p, height = 6, width = 6, dpi = 300)
+
+
+# global bar plot 
 HC.peaks <- tab %>% 
   filter(intersection == "yes" & Global_KD_vs_WT %in% c('down_reg', 'up_reg') ) %>% 
   dplyr::select(chr, start_peak, end_peak, V4, V5, V11,gene_name,intersection, Global_KD_vs_WT,ProductDescription.x , Category ) %>% 
@@ -216,6 +311,8 @@ p
 ggsave("../Output/toxo_cdc/ME49_59/figures_paper/High_Conf_CutRun_peaks_global_DEGs_KD_vs_WT_ribo_stacked.pdf", 
        plot = p, width = 5, height = 4, dpi = 300)
 
+
+
 ## 
 # p <- ggplot(data=HC.peaks.stat, aes(x=dir, y=total, fill=Category)) +
 #   geom_bar(stat="identity", color="black", position=position_dodge())+
@@ -281,42 +378,6 @@ cluster.bed.list <- lapply(1:length(HC.peaks.list), function(i){
                                           fo =paste(out.dir, fasta.name, sep = ""))
   return(cluster.bed)
 })
-
-
-## summary of motif 1 and motif 2 
-
-tab <- readRDS("../Input/toxo_cdc/rds_ME49_59/cut_run_union_new_peaks_march_motif_modulated_genes_lfs_v4.rds")
-
-tab.down.reg <- tab %>% 
-  dplyr::select(intersection, gene_name, has.motif, motif, Global_KD_vs_WT, ProductDescription.x, Category) %>%
-  filter(intersection == "yes" , has.motif == "yes" & Global_KD_vs_WT == "down_reg" & motif %in% c("motif_1", "motif_2")) %>% distinct()
-
-tab.down.reg <- tab.down.reg %>% group_by(gene_name) %>% mutate(motif.list = list(motif)) 
-tab.down.reg <- tab.down.reg %>% rowwise() %>%
-  mutate(which_motif = ifelse(length(unlist(motif.list)) > 1 , "both" , "one")) %>% distinct()
-
-ind.one <- which(tab.down.reg$which_motif == "one")
-tab.down.reg$which_motif[ind.one] <- tab.down.reg$motif[ind.one]
-
-tab.sum <- tab.down.reg %>% group_by(which_motif, Category, Global_KD_vs_WT) %>% 
-  summarise(genes = list(unique(gene_name)), total = list(length(unique(gene_name))))
-
-tab.down.reg.uniq <- tab.down.reg %>%
-  dplyr::select(gene_name, has.motif, Global_KD_vs_WT, ProductDescription.x, Category, which_motif) %>%
-  distinct()
-write.xlsx(tab.down.reg.uniq, "../Output/toxo_cdc/ME49_59/tables/global_KD_vs_WT_down_reg_motif1_motif2_occurence.xlsx")
-
-m1.v2 <- tab.down.reg %>% filter(motif %in% c("motif_1"))
-m2.v2 <- tab.down.reg %>% filter(motif %in% c( "motif_2"))
-
-ven.list <- list(motif_1 = unique(m1.v2$gene_name), motif_2 = unique(m2.v2$gene_name))
-p <- ggVennDiagram(ven.list, set_size = 6, label_size = 8)
-p <- p + ggtitle("down_reg") +theme(
-  plot.title = element_text(size=20, face = "bold.italic", color = 'red'))
-
-p
-ggsave("../Output/toxo_cdc/ME49_59/figures_paper/global_KD_vs_WT_down_reg_motif1_motif2_occurence_venn.pdf", 
-       plot = p, height = 6, width = 6, dpi = 300)
 
 
 
