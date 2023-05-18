@@ -20,6 +20,7 @@ library(bigmemory)
 
 
 source('./util_funcs.R')
+source('./util_funcs_YR.R')
 
 ## IDs
 prod.desc  <- read.xlsx('../Input/toxo_genomics/genes/ProductDescription_GT1.xlsx')
@@ -558,7 +559,7 @@ ggsave(plot = pp , "../Output/toxo_cdc/ME49_59/figures_paper/dtw_clust_matched_r
 ## rna transition markers with ordered clusters based on the peak (visually inspected)
 ############################################################################################
 
-plot_rna_atac_trends <- function(sc.rna.sc.atac.joint.long.sub){
+plot_rna_atac_trends.ord <- function(sc.rna.sc.atac.joint.long.sub){
   p  <- ggplot(sc.rna.sc.atac.joint.long.sub, aes(x= time,y=normExpr)) +
     geom_path(aes(color = GeneID),alpha = 0.8, size = 0.8)+ 
     theme_bw() +
@@ -617,13 +618,13 @@ rna.trans.data$cluster.RNA.ordered <- gsub("\\D", "C", rna.trans.data$new.ord.cl
 rna.trans.data$data <- factor(rna.trans.data$data, levels = c("scRNA", "scATAC"))
 rna.trans.data.list <- split(rna.trans.data, f= rna.trans.data$group)
 #saveRDS(rna.trans.data.list, "../Input/toxo_cdc/rds_ME49_59/rna_markers_rna_transitions_dtw_clust_list_ordered.rds")
-
+rna.trans.data.list <- readRDS("../Input/toxo_cdc/rds_ME49_59/rna_markers_rna_transitions_dtw_clust_list_ordered.rds")
 trans.plt <- c()
 trans.plt <- lapply(1:length(rna.trans.data.list), function(i) {
   
   my.df <- rna.trans.data.list[[i]]
   
-  p1 <- plot_rna_atac_trends(my.df) 
+  p1 <- plot_rna_atac_trends.ord(my.df) 
   # +
   #   ggtitle(names(rna.trans.marker.genes.list[i]))
   p1
@@ -637,5 +638,23 @@ ggsave( "../Output/toxo_cdc/ME49_59/figures_paper/rna_markers_rna_transitions_dt
         height = 16,width = 16, dpi = 300)
 
 
+p1 <-trans.plt[[1]]
+p1
+ggsave( "../Output/toxo_cdc/ME49_59/figures_paper/T1_rna_clust_ordered.pdf",
+        plot = p1,height = 8,width = 10, dpi = 300)
+p2 <-trans.plt[[2]]
+p2
+ggsave( "../Output/toxo_cdc/ME49_59/figures_paper/T2_rna_clust_ordered.pdf",
+        plot = p2,height = 8,width = 10, dpi = 300)
 
+p3 <-trans.plt[[3]]
+p3
+ggsave( "../Output/toxo_cdc/ME49_59/figures_paper/T3_rna_clust_ordered.pdf",
+        plot = p3,height = 8,width = 10, dpi = 300)
 
+p4 <-trans.plt[[4]]
+p4
+ggsave( "../Output/toxo_cdc/ME49_59/figures_paper/T4_rna_clust_ordered.pdf",
+        plot = p4,height = 8,width = 10, dpi = 300)
+
+#################################################################################
