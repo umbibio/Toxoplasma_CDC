@@ -238,3 +238,51 @@ ggsave(filename="../Output/toxo_cdc/ME49_59/tables/all_GO/HighConfPeaks_globalDE
        units = "in", # other options are "in", "cm", "mm"
        dpi = 300
 )
+
+
+###########################################################
+############## atac sub clusters ##########################
+###########################################################
+in.dir <- '../Output/toxo_cdc/ME49_59/tables/atac_clusters_within_rna_tran_dtw_clusters_manual_GO_result/'
+all.clust.items <- getGOtab(dir  = in.dir)
+write.xlsx(all.clust.items, '../Output/toxo_cdc/ME49_59/tables/all_GO/atac_sub_clusters_GO_term.xlsx')
+
+
+
+filtered.Go <- all.clust.items %>% arrange(cluster, Benjamini) %>% distinct() %>%
+  group_by(cluster) %>% mutate(rank = row_number()) %>%
+  #dplyr::filter(pval < 0.05 )
+  dplyr::filter(Benjamini < 0.1 & rank < 5) %>% arrange(cluster, Benjamini)
+
+filtered.Go$cluster <- factor(filtered.Go$cluster, levels = sort(unique(filtered.Go$cluster)))
+filtered.Go$ID <- factor(filtered.Go$ID, level=unique(filtered.Go$ID))
+filtered.Go$Name <- factor(filtered.Go$Name, level = rev(unique(filtered.Go$Name)))
+write.xlsx(filtered.Go, '../Output/toxo_cdc/ME49_59/tables/all_GO/atac_sub_clusters_filt_GO_term.xlsx')
+
+ #scale_colour_gradient(limits=c(0, 0.01)
+mycolors <- c(rep("#ff9a00",8),rep('#9ca820',6), rep('#615FB1',5), rep('#8f139f',4))
+names(mycolors) <- factor(unique(filtered.Go$cluster), levels = unique(filtered.Go$cluster))
+
+p <- ggplot(filtered.Go, aes(x = cluster, y = Name, color = cluster)) + 
+  geom_point(aes( size =  -log(Benjamini))) +
+  theme_bw(base_size = 14) +
+  scale_colour_manual(name = filtered.Go$cluster, values = mycolors)+
+  #scale_colour_gradient(limits=c(0, 0.01), low="red") +
+  ylab(NULL) + xlab(NULL) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 16, face="bold")) + 
+  theme(axis.text.y = element_text(angle = 0, hjust = 1, size = 12, face="bold")) +
+  theme(legend.position="none") +
+  theme(strip.background = element_rect(colour="black", fill="white", 
+                                        size=0.5, linetype="solid")) + guides(color = FALSE)+
+  #ggtitle(strsplit(in.dir,split = "/")[[1]][5]) +
+  theme(plot.title = element_text(size = 10))
+
+plot(p)
+
+ggsave(filename ="../Output/toxo_cdc/ME49_59/tables/all_GO/atac_sub_clusters_GO_term.pdf",
+       plot=p ,
+       width = 14, height = 12,
+       units = "in", # other options are "in", "cm", "mm"
+       dpi = 300
+)
+
