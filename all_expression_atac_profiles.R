@@ -22,7 +22,27 @@ library(geomtextpath)
 source('./util_funcs.R')
 
 # expression and atac profile of one gene at a time
-plot_trends <- function(my.GeneID){
+plot_trends <- function(my.GeneID, sc.rna.spline.fits,sc.atac.spline.fits ){
+  
+  
+  ## Turn the data into wide format (time by gene) and center & scale each gene
+  sc.rna.dtw.wide <- sc.rna.spline.fits %>% 
+    pivot_wider(names_from = 'GeneID', values_from = 'y') %>% 
+    mutate_at(vars(matches("TGME")), ~scale(., center = F, scale = F)) %>%
+    as.data.frame()
+  
+  sc.atac.dtw.wide <- sc.atac.spline.fits %>% 
+    pivot_wider(names_from = 'GeneID', values_from = 'y') %>% 
+    mutate_at(vars(matches("TGME")), ~scale(., center = F, scale = F)) %>%
+    as.data.frame()
+  
+  
+  sc.rna.mu.scale <- sc.rna.dtw.wide %>% 
+    pivot_longer(-x, names_to = 'GeneID', values_to = 'expr')
+  
+  sc.atac.mu.scale <- sc.atac.dtw.wide %>% 
+    pivot_longer(-x, names_to = 'GeneID', values_to = 'expr')
+  
   
   my.rna <- sc.rna.mu.scale %>% dplyr::filter(GeneID == my.GeneID)
   my.atac <- sc.atac.mu.scale %>% dplyr::filter(GeneID == my.GeneID)
@@ -192,6 +212,7 @@ p1
 ggsave("../Output/toxo_cdc/ME49_59/figures_paper/High_conf_peaks_down_reg_Global_KD_vs_WT_ribosomal_No_clustering.pdf", 
        plot = p1, height = 3, width = 6, dpi = 300)
 
+plot_trends("TGME49-227600",sc.rna.spline.fits, sc.atac.spline.fits)
 
 ## table of genes of interest
 ## cut and run intersection and phase based KD vs WT 
