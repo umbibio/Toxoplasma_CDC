@@ -412,7 +412,7 @@ peak.genes.bed.merged.bed$peak <- paste(peak.genes.bed.merged.bed$chr,
                                          peak.genes.bed.merged.bed$end_peak, sep = "-")
 gene <- "TGME49_300100"
 gene <- "TGME49_204530"
-gene <- "TGME49_280460"
+gene <- "TGME49_309820"
 
 peak <- peak.genes.bed.merged.bed$peak[peak.genes.bed.merged.bed$gene_name %in% gene]
 region <- StringToGRanges(regions = gsub('TGME49-', 'TGME49_',peak),  sep = c("-", "-"))
