@@ -21,6 +21,53 @@ library(geomtextpath)
 
 source('./util_funcs.R')
 
+# expression and atac profile of one gene at a time
+plot_trends <- function(my.GeneID){
+  
+  my.rna <- sc.rna.mu.scale %>% dplyr::filter(GeneID == my.GeneID)
+  my.atac <- sc.atac.mu.scale %>% dplyr::filter(GeneID == my.GeneID)
+  
+  p1  <- ggplot(my.rna , aes(x= x,y=expr)) +
+    geom_line(color = 'blue',alpha = 0.8, size = 0.8)+ 
+    theme_bw(base_size = 14) +
+    theme(legend.position = "right") +
+    ylab('normExpr') + xlab('Time') +
+    theme(axis.text.x = element_text(angle = 0, hjust = 1, size = 12, face="bold")) +
+    theme(axis.text.y = element_text(angle = 0, hjust = 1, size = 12, face="bold")) +
+    theme(strip.background = element_rect(colour="black", fill="white",
+                                          size=0.5, linetype="solid")) +
+    ggtitle(paste('rna', my.GeneID)) + 
+    theme(strip.text = element_text(size = 14, face="bold", angle = 0)) + 
+    theme(
+      plot.title = element_text(size=14, face = "bold.italic", color = 'black'),
+      axis.title.x = element_text(size=14, face="bold", hjust = 1),
+      axis.title.y = element_text(size=14, face="bold")
+    ) 
+  
+  
+  p2  <- ggplot(my.atac , aes(x= x,y=expr)) +
+    geom_line(color = 'red',alpha = 0.8, size = 0.8)+ 
+    theme_bw(base_size = 14) +
+    theme(legend.position = "right") +
+    ylab('normExpr') + xlab('Time') +
+    theme(axis.text.x = element_text(angle = 0, hjust = 1, size = 12, face="bold")) +
+    theme(axis.text.y = element_text(angle = 0, hjust = 1, size = 12, face="bold")) +
+    theme(strip.background = element_rect(colour="black", fill="white",
+                                          size=0.5, linetype="solid")) +
+    ggtitle(paste('atac', my.GeneID)) + 
+    theme(strip.text = element_text(size = 14, face="bold", angle = 0)) + 
+    theme(
+      plot.title = element_text(size=14, face = "bold.italic", color = 'black'),
+      axis.title.x = element_text(size=14, face="bold", hjust = 1),
+      axis.title.y = element_text(size=14, face="bold")
+    ) 
+  
+  p <- grid.arrange(p1, p2)
+  
+  return(p)
+}
+
+
 ## this function plots rna and atac profile of genes in a table of interest
 
 plot_rna_atac <- function(sc.rna.sc.atac.joint.long.sub){
@@ -114,11 +161,20 @@ sc.atac.spline.fits <- readRDS('../Input/toxo_cdc/rds_ME49_59/sc_atac_spline_fit
 tab <- readRDS("../Input/toxo_cdc/rds_ME49_59/cut_run_union_new_peaks_march_motif_modulated_genes_lfs_v4.rds")
 names(tab)[1] <- "chr"
 
+## global 
 tab <- tab %>% 
   filter(intersection == "yes" & Global_KD_vs_WT %in% c('down_reg', 'up_reg', 'modulated') ) %>% 
   dplyr::select(chr, start_peak, end_peak, V4, V5, V11,gene_name,intersection, Global_KD_vs_WT, ProductDescription.x , Category ) %>% 
   distinct()
 names(tab)[9] <- "dir"
+
+## phase based 
+tab <- tab %>% 
+  filter(intersection == "yes" & KD_vs_WT_phase_based %in% c('down_reg', 'up_reg', 'modulated') ) %>% 
+  dplyr::select(chr, start_peak, end_peak, V4, V5, V11,gene_name,intersection, KD_vs_WT_phase_based, ProductDescription.x , Category ) %>% 
+  distinct()
+names(tab)[9] <- "dir"
+
 
 HC.peaks <- tab %>% filter(Category == "ribosomal")
 colnames(HC.peaks) <- gsub("ProductDescription.x", "ProductDescription", colnames(HC.peaks))
@@ -126,7 +182,7 @@ colnames(HC.peaks) <- gsub("ProductDescription.x", "ProductDescription", colname
 
 expr.atac.tab <- get_rna_atac_profile(rna.splines = sc.rna.spline.fits, 
                                       atac.splines = sc.atac.spline.fits, 
-                                      genes.tab = HC.peaks, scale = T)
+                                      genes.tab = HC.peaks, scale = F)
 
 ## if you wan the atac profiles as well, then do not filter data == "scRNA
 expr.tab <- expr.atac.tab %>% filter(data == "scRNA")
