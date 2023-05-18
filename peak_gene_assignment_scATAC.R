@@ -146,7 +146,7 @@ peak.genes.bed.merged.bed <- peak.genes.bed.merged %>% dplyr::select(V1.x, start
 write.table(peak.genes.bed.merged.bed, "../Input/toxo_scATAC_MJ_ME49_59/peak_gene_assigned_final.bed",
             sep = "\t", quote = F, row.names = F, col.names = F)
 write.xlsx(peak.genes.bed.merged.bed, "../Input/toxo_scATAC_MJ_ME49_59/peak_gene_assigned_final.xlsx")
-saveRDS(peak.genes.bed.merged.bed, "../Input/toxo_cdc/rds/peak_gene_assigned_final.rds")
+
 
 # only peaks iinformation to be loaded into IGV
 peak.merged.bed <- peak.genes.bed.merged.bed %>% 
