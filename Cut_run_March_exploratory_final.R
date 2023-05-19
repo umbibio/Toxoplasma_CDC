@@ -52,6 +52,12 @@ venn.plot <- draw.pairwise.venn(
 
 dev.off()
 
+## for IGV plot
+DEG.peaks <- tab %>% 
+  dplyr::select(intersection, gene_name, has.motif, motif, KD_vs_WT_phase_based, ProductDescription.x, Category) %>%
+  filter(intersection == "yes" , has.motif == "yes"  & motif %in% c("motif_1", "motif_2")) %>% distinct() %>% na.omit()
+
+
 
 ######### motifs summary ########
 ## phase based 
@@ -161,6 +167,10 @@ ggsave("../Output/toxo_cdc/ME49_59/figures_paper/High_Conf_CutRun_peaks_phase_ba
 
 ## KD vs WT global 
 tab <- readRDS("../Input/toxo_cdc/rds_ME49_59/cut_run_union_new_peaks_march_motif_modulated_genes_lfs_v4.rds")
+
+DEG.peaks <- tab %>% 
+  dplyr::select(intersection, gene_name, has.motif, motif, Global_KD_vs_WT, ProductDescription.x, Category) %>%
+  filter(intersection == "yes" , has.motif == "yes"  & motif %in% c("motif_1", "motif_2")) %>% distinct() %>% na.omit()
 
 KD.vs.WT.glob <- tab %>% dplyr::select(gene_name, Global_KD_vs_WT) %>% 
   filter(Global_KD_vs_WT != "NA") %>% distinct()
