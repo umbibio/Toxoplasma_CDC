@@ -153,7 +153,7 @@ plot_rna_atac_trends <- function(sc.rna.sc.atac.joint.long.sub){
   
 }
 
-sc.rna.sc.atac.joint.long <- readRDS('../Input/toxo_cdc/rds_ME49_59/Cyclic_33_AP2s_sc_rna_sc_atac_dtw_5_clust.rds')
+sc.rna.sc.atac.joint.long <- readRDS('../Input/toxo_cdc/rds_ME49_59/Cyclic_33_AP2s_sc_rna_sc_atac_dtw_4_clust.rds')
 sc.rna.sc.atac.joint.long$data <- factor(sc.rna.sc.atac.joint.long$data, levels = c("scRNA", "scATAC"))
 p1 <- plot_rna_atac_trends(sc.rna.sc.atac.joint.long)
 
