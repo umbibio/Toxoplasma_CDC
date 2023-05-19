@@ -125,7 +125,9 @@ sc.rna.sc.atac.joint.long$cluster.RNA <- paste('C', sc.rna.sc.atac.joint.long$cl
 
 saveRDS(sc.rna.sc.atac.joint.long, '../Input/toxo_cdc/rds_ME49_59/BC_sc_rna_sc_atac_joint_dtw_clust_new_update.rds')
 
-
+sc.rna.sc.atac.joint.long <- readRDS('../Input/toxo_cdc/rds_ME49_59/BC_sc_rna_sc_atac_joint_dtw_clust_new_update.rds')
+sc.rna.sc.atac.joint.long$data <- factor(sc.rna.sc.atac.joint.long$data, 
+                                         levels = c("scRNA", "scATAC"))
 plot_rna_atac_trends <- function(sc.rna.sc.atac.joint.long.sub){
   p  <- ggplot(sc.rna.sc.atac.joint.long.sub, aes(x= time,y=normExpr)) +
     geom_path(aes(color = Name,),alpha = 0.8, size = 0.8)+ 
