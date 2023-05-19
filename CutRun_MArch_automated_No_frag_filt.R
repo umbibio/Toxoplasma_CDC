@@ -370,7 +370,7 @@ bed.genes.list <- lapply(1:length(bed.files), function(i){
   bed.genes$has.motif <- "yes"
   bed.genes$motif <- gsub("peak_genes_union_0_05_NO_frag_filt_", "", bed.names[i])
   
-  write.xlsx(bed.genes, paste(out.dir, paste(bed.names[i], "genes.xlsx", sep = "_"), sep =""))
+  #write.xlsx(bed.genes, paste(out.dir, paste(bed.names[i], "genes.xlsx", sep = "_"), sep =""))
   
   return(bed.genes)
   
@@ -379,9 +379,10 @@ bed.genes.list <- lapply(1:length(bed.files), function(i){
 names(bed.genes.list) <- bed.names
 
 saveRDS(bed.genes.list, "../Input/toxo_cdc/rds_ME49_59/Union_all_new_peaks_motif_info_NO_frag_filt.rds")
+saveRDS(bed.genes.list[1:2], "../Input/toxo_cdc/rds_ME49_59/Union_all_new_peaks_motif_info_NO_frag_filt_motif1_motif2.rds")
 
-
-CutRunPeaksMotif <- readRDS("../Input/toxo_cdc/rds_ME49_59/Union_all_new_peaks_motif_info_NO_frag_filt.rds")
+#CutRunPeaksMotif <- readRDS("../Input/toxo_cdc/rds_ME49_59/Union_all_new_peaks_motif_info_NO_frag_filt.rds")
+CutRunPeaksMotif <- readRDS("../Input/toxo_cdc/rds_ME49_59/Union_all_new_peaks_motif_info_NO_frag_filt_motif1_motif2.rds")
 CutRunPeaksMotif <- do.call("rbind", CutRunPeaksMotif)
 CutRunPeaksMotif <- CutRunPeaksMotif %>% 
   dplyr::select(V13, ProductDescription, has.motif, motif) %>% distinct() 
@@ -393,7 +394,7 @@ peak.genes.union <- readRDS("../Input/toxo_cdc/rds_ME49_59/Union_all_new_peaks_0
 ## add motif info to the table
 CutRun.all.info <- left_join(peak.genes.union, CutRunPeaksMotif, by = c("gene_name" = "V13"))
 saveRDS(CutRun.all.info,"../Input/toxo_cdc/rds_ME49_59/Union_all_new_peaks_0.05_qval_NO_frag_filt_intersect_info_motif_info.rds" )
-
+saveRDS(CutRun.all.info,"../Input/toxo_cdc/rds_ME49_59/Union_all_new_peaks_0.05_qval_NO_frag_filt_intersect_info_motif_info_motif_1_motif2.rds" )
 
 ##################################################
 ## Add chip info HDAC3, MORC and AP2XII-2 chip seq
@@ -446,55 +447,6 @@ saveRDS(CutRun.peaks.motif.chip,"../Input/toxo_cdc/rds_ME49_59/union_peaks_cut_r
 
 
 
-########### Overlap of cut and run peaks  with atac- venn diagram  ########
-########### after peak - gene assignment ##################################
-
-## this is not the right way the next section is what we need #############
-##  atac peaks (after peak gene assignments)
-
-## use the unique peaks that have been assigned to genes 
-peak.genes.bed.merged.bed <- read.table("../Input/toxo_scATAC_MJ_ME49_59/peak_gene_assigned_final.bed", sep = "\t")
-peak.genes.bed.merged.bed$peakLoc <- paste(peak.genes.bed.merged.bed$V1, paste(peak.genes.bed.merged.bed$V2, peak.genes.bed.merged.bed$V3, sep = "-"), sep = ":")
-peak.genes.bed.merged.bed <- peak.genes.bed.merged.bed %>% dplyr::select(-c(V6, V7)) %>% distinct()
-nrow(peak.genes.bed.merged.bed)
-
-# cut and run (after peak gene assignment) 
-peak.genes.union.new <- readRDS( "../Input/toxo_cdc/rds_ME49_59/Union_all_new_peaks_0.05_qval_NO_frag_filt.rds")
-cut.run.peaks <- peak.genes.union.new$peak.gene.merged.bed[1:5] %>% distinct()
-nrow(cut.run.peaks)
-  # cut.run.peaks <- peak.genes.union.new$peak.gene.merged.bed %>% ungroup() %>% 
-#   dplyr::select(V1.x, start_peak, end_peak) %>% distinct()
-
-# overlap atac and cut RUN
-options(bedtools.path = "/Users/kourosh.zarringhalam/miniconda3/bin/")
-peak.cutRun.atac.ovrlp <- bedtoolsr::bt.intersect(a = cut.run.peaks, b = peak.genes.bed.merged.bed, wb = T)
-
-#peak.cutRun.atac.ovrlp <- peak.cutRun.atac.ovrlp %>% distinct(V7, .keep_all = T)
-
-
-library(VennDiagram)
-pdf(file = "../Output/toxo_cdc/ME49_59/figures_paper/cut_run_union_peaks_overlap_atac_peaks_venn.pdf")
-venn.plot <- draw.pairwise.venn(
-  area1 = nrow(peak.genes.bed.merged.bed),
-  area2 = nrow(cut.run.peaks),
-  cross.area = nrow(peak.cutRun.atac.ovrlp),
-  #category = c("ATAC", "C&R"),
-  fill = c("#F19F39", "#469C2C"),
-  lty = "blank",
-  cex = 4,
-  cat.cex = 3,
-  #cat.pos = c(285, 105),
-  #cat.dist = 0.09,
-  #cat.just = list(c(-1, -1), c(1, 1)),
-  #ext.pos = 30,
-  #ext.dist = -0.05,
-  ext.length = 0.9,
-  ext.line.lwd = 2.5,
-  #ext.line.lty = "dashed"
-)
-grid.draw(venn.plot);
-
-dev.off()
 
 ########### Overlap of cut and run peaks  with atac- venn diagram  ########
 ########### befor peak - gene assignment ##################################
