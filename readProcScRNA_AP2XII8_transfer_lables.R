@@ -54,7 +54,7 @@ FeatureScatter(S.O.intra, "nCount_RNA", "nFeature_RNA",  pt.size = 0.5)
 selected_c <- WhichCells(S.O.intra, expression = nFeature_RNA > 100 & nFeature_RNA < 1100)
 selected_f <- rownames(S.O.intra)[ Matrix::rowSums(S.O.intra) > 5]
 S.O.intra  <- subset(S.O.intra, features=selected_f, cells=selected_c)
-
+dim(S.O.intra@assays$RNA@data)
 
 S.O.list <- list(intra = S.O.intra)
 
