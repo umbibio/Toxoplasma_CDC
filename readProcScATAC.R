@@ -160,7 +160,9 @@ Tg_ATAC <- subset(
     nucleosome_signal < 4 &
     TSS.enrichment > 2
 )
-Tg_ATAC
+
+# stats
+dim(Tg_ATAC@assays$peaks)
 
 
 
