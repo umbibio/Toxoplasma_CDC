@@ -115,3 +115,27 @@ p1 <- plot_rna_atac(expr.tab)
 p1 
 ggsave("../OutPut/toxo_cdc/ME49_59/figures_paper/T1C1C1.pdf", 
        plot = p1, height = 3, width = 5, dpi = 300)
+
+
+prod.desc  <- read.xlsx('../Input/toxo_genomics/genes/ProductDescription_GT1.xlsx')
+TGGT1_ME49 <- read.xlsx('../Input/toxo_genomics/Orthologs/TGGT1_ME49 Orthologs.xlsx')
+prod.desc <- left_join(prod.desc, TGGT1_ME49, by = c("GeneID" = "TGGT1")) %>% na.omit()
+MJ_annot <- read.xlsx("../Input/Toxo_genomics/genes/MJ_annotation.xlsx")
+MJ_annot <- MJ_annot %>% dplyr::select(!Product.Description)
+prod.desc <- left_join(prod.desc, MJ_annot, by= "TGME49" )
+
+
+in.dir <- "../OutPut/toxo_cdc/ME49_59/tables/atac_clusters_within_rna_tran_dtw_clusters_manual/"
+files <- gsub(".xlsx", "", list.files(in.dir))
+
+
+for (i in 1: length(files)){
+  
+  tab <- read.xlsx(paste(in.dir, paste(files[i], ".xlsx", sep = ""), sep = ""))
+  colnames(tab)[1] <- "gene_name"
+  tab$gene_name <- gsub("-", "_", tab$gene_name)
+  tab <- inner_join(tab, prod.desc, by = c("gene_name" = "TGME49"))
+  
+  write.xlsx(tab, paste(in.dir, paste(files[i], "desc.xlsx", sep = "_") , sep = ""))
+  
+}
