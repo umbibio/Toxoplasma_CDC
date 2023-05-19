@@ -41,50 +41,8 @@ saveRDS(Intra.markers.sig, '../Input/toxo_cdc/rds_ME49_59/Intra_markers_sig.rds'
 rna_sub <- readRDS('../Input/toxo_cdc/rds_ME49_59/S.O.intra_rna_atac_trnasition_v2.rds')
 atac_sub <- readRDS('../Input/toxo_cdc/rds_ME49_59/S.O.intra_atac_atac_trnasition_v2.rds')
 
-## rna 
-## Differential gene expression usin atac transition
-## rna markers using atac transition points
 
-Idents(rna_sub) <- 'transition.atac'
-transition.markers <- FindAllMarkers(object = rna_sub, only.pos = T, min.pct = 0)
-transition.markers$GeneID <- gsub('-', '_', transition.markers$gene)
-transition.markers.sig <- transition.markers %>% dplyr::filter(avg_log2FC > log2(1.5) & p_val_adj < 0.05)
-dim(transition.markers.sig)
-
-saveRDS(transition.markers.sig, '../Input/toxo_cdc/rds_ME49_59/rna_markers_sig_atac_trans_v2.rds')
-write.xlsx(transition.markers.sig, '../Output/toxo_cdc/ME49_59/tables/rna_markers_sig_atac_trns_v2.xlsx')
-
-ss.atac <- transition.markers.sig %>% group_by(cluster) %>% summarise(num.DEG = n())
-ss.atac$cluster <- factor(ss.atac$cluster, levels = c('T1', 'T2', 'T3', 'T4'))
-ss.atac
-
-p <- ggplot(data=ss.atac, aes(x=cluster, y=num.DEG)) +
-  geom_bar(stat="identity", fill="steelblue")+
-  geom_text(aes(label=num.DEG), vjust=1.6, color="black", size=8, fontface="bold")+
-  theme_minimal() + 
-  ylab('DEGs') + xlab('') +
-  theme(axis.text.x = element_text(angle = 0, hjust = 1, size = 16, face="bold",color = "black" )) +
-  theme(axis.text.y = element_text(angle = 0, hjust = 1, size = 16, face="bold", color = "black")) +
-  theme(strip.background = element_rect(colour="black", fill="white",
-                                        size=0.5, linetype="solid")) +
-  theme(
-    plot.title = element_text(size=18, face = "bold.italic", color = 'black'),
-    axis.title.x = element_text(size=18, face="bold", hjust = 1),
-    axis.title.y = element_text(size=18, face="bold")
-  ) 
-
-p <- plot(p) + ggtitle("scRNA-seq markers - atac transitions ")
-p
-ggsave(filename="../Output/toxo_cdc/ME49_59/figures/tg_Intra_deg_numbers_atac_transition.pdf",
-       plot=p,
-       width = 6, height = 6,
-       units = "in", # other options are "in", "cm", "mm"
-       dpi = 300
-)
-
-
-
-## Fig 4A
+## Fig 5A
 ## rna 
 ## Differential gene expression usin rna transition
 ## rna markers using rna transition points
@@ -133,6 +91,50 @@ rna.sig.markers.rna.trans <- readRDS('../Input/toxo_cdc/rds_ME49_59/rna_markers_
 rna.sig.markers.rna.trans.sum <- rna.sig.markers.rna.trans %>%
   group_by(cluster) %>% summarise(genes = list(GeneID), total = n())
 write.xlsx(rna.sig.markers.rna.trans.sum, "../Output/toxo_cdc/ME49_59/tables/rna_sig_markers_rna_trans_sum_v2.xlsx")
+
+
+
+## Differential gene expression usin atac transition
+## rna markers using atac transition points
+
+Idents(rna_sub) <- 'transition.atac'
+transition.markers <- FindAllMarkers(object = rna_sub, only.pos = T, min.pct = 0)
+transition.markers$GeneID <- gsub('-', '_', transition.markers$gene)
+transition.markers.sig <- transition.markers %>% dplyr::filter(avg_log2FC > log2(1.5) & p_val_adj < 0.05)
+dim(transition.markers.sig)
+
+saveRDS(transition.markers.sig, '../Input/toxo_cdc/rds_ME49_59/rna_markers_sig_atac_trans_v2.rds')
+write.xlsx(transition.markers.sig, '../Output/toxo_cdc/ME49_59/tables/rna_markers_sig_atac_trns_v2.xlsx')
+
+ss.atac <- transition.markers.sig %>% group_by(cluster) %>% summarise(num.DEG = n())
+ss.atac$cluster <- factor(ss.atac$cluster, levels = c('T1', 'T2', 'T3', 'T4'))
+ss.atac
+
+p <- ggplot(data=ss.atac, aes(x=cluster, y=num.DEG)) +
+  geom_bar(stat="identity", fill="steelblue")+
+  geom_text(aes(label=num.DEG), vjust=1.6, color="black", size=8, fontface="bold")+
+  theme_minimal() + 
+  ylab('DEGs') + xlab('') +
+  theme(axis.text.x = element_text(angle = 0, hjust = 1, size = 16, face="bold",color = "black" )) +
+  theme(axis.text.y = element_text(angle = 0, hjust = 1, size = 16, face="bold", color = "black")) +
+  theme(strip.background = element_rect(colour="black", fill="white",
+                                        size=0.5, linetype="solid")) +
+  theme(
+    plot.title = element_text(size=18, face = "bold.italic", color = 'black'),
+    axis.title.x = element_text(size=18, face="bold", hjust = 1),
+    axis.title.y = element_text(size=18, face="bold")
+  ) 
+
+p <- plot(p) + ggtitle("scRNA-seq markers - atac transitions ")
+p
+ggsave(filename="../Output/toxo_cdc/ME49_59/figures/tg_Intra_deg_numbers_atac_transition.pdf",
+       plot=p,
+       width = 6, height = 6,
+       units = "in", # other options are "in", "cm", "mm"
+       dpi = 300
+)
+
+
 
 ## ATAC
 ## atac markers using atac transitions  (this is based on gene activity)
