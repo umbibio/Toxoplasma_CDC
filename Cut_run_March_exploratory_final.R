@@ -4,25 +4,23 @@
 
 ## phase based ##
 
-tab <- readRDS("../Input/toxo_cdc/rds_ME49_59/cut_run_union_new_peaks_march_motif_modulated_genes_lfs_v4.rds")
-names(tab)[1] <- "chr"
-#saveRDS(tab, "../Input/toxo_cdc/rds_ME49_59/cut_run_union_new_peaks_march_motif_modulated_genes_lfs_v4.rds")
+tab <- readRDS("../Input/toxo_cdc/rds_ME49_59/cut_run_union_new_peaks_march_motif_modulated_genes_lfs_v5.rds")
 
 
 ## DEGs KD vs WT phase based 
-KD.vs.WT.phase <- tab %>% dplyr::select(gene_name, KD_vs_WT_phase_based) %>% 
+KD.vs.WT.phase <- tab %>% dplyr::select(TGME49, KD_vs_WT_phase_based) %>% 
   filter(KD_vs_WT_phase_based != "NA") %>% distinct()
 dim(KD.vs.WT.phase)
 
 # cutRun genes in intersection of 4 data
-intrsct.peaks  <- tab %>% dplyr::select(gene_name, intersection) %>% 
-  distinct() %>% filter(intersection == "yes")
+intrsct.peaks  <- tab %>% dplyr::select(TGME49,intersection_CutRun_dataSets) %>% 
+  distinct() %>% filter(intersection_CutRun_dataSets == "yes")
 dim(intrsct.peaks)
 
 ## overlap - venn
 DEGs <- KD.vs.WT.phase
-venn.list <- list(KD.vs.WT = unique(DEGs$gene_name), 
-                  High.Conf.Peaks = intrsct.peaks$gene_name)
+venn.list <- list(KD.vs.WT = unique(DEGs$TGME49), 
+                  High.Conf.Peaks = intrsct.peaks$TGME49)
 
 p <- ggVennDiagram(venn.list, set_size = 6, label_size = 8) 
 p
@@ -52,21 +50,16 @@ venn.plot <- draw.pairwise.venn(
 
 dev.off()
 
-## for IGV plot
-DEG.peaks <- tab %>% 
-  dplyr::select(intersection, gene_name, has.motif, motif, KD_vs_WT_phase_based, ProductDescription.x, Category) %>%
-  filter(intersection == "yes" , has.motif == "yes"  & motif %in% c("motif_1", "motif_2")) %>% distinct() %>% na.omit()
-
 
 
 ######### motifs summary ########
 ## phase based 
 tab.down.reg <- tab %>% 
-  dplyr::select(intersection, gene_name, has.motif, motif, KD_vs_WT_phase_based, ProductDescription.x, Category) %>%
-  filter(intersection == "yes" , has.motif == "yes" & KD_vs_WT_phase_based == "down_reg" & motif %in% c("motif_1", "motif_2")) %>% distinct()
+  dplyr::select(intersection_CutRun_dataSets, TGME49, has.motif, motif, KD_vs_WT_phase_based, ProductDescription, Category) %>%
+  filter(intersection_CutRun_dataSets == "yes" , has.motif == "yes" & KD_vs_WT_phase_based == "down_reg" & motif %in% c("motif_1", "motif_2")) %>% distinct()
 
 
-tab.down.reg <- tab.down.reg %>% group_by(gene_name) %>% mutate(motif.list = list(motif)) 
+tab.down.reg <- tab.down.reg %>% group_by(TGME49) %>% mutate(motif.list = list(motif)) 
 tab.down.reg <- tab.down.reg %>% rowwise() %>%
   mutate(which_motif = ifelse(length(unlist(motif.list)) > 1 , "both" , "one")) %>% distinct()
 
@@ -74,17 +67,17 @@ ind.one <- which(tab.down.reg$which_motif == "one")
 tab.down.reg$which_motif[ind.one] <- tab.down.reg$motif[ind.one]
 
 tab.sum <- tab.down.reg %>% group_by(which_motif, Category, KD_vs_WT_phase_based) %>% 
-  summarise(genes = list(unique(gene_name)), total = length(unique(gene_name)))
+  summarise(genes = list(unique(TGME49)), total = length(unique(TGME49)))
 
 tab.down.reg.uniq <- tab.down.reg %>%
-  dplyr::select(gene_name, has.motif, KD_vs_WT_phase_based, ProductDescription.x, Category, which_motif) %>%
+  dplyr::select(TGME49, has.motif, KD_vs_WT_phase_based, ProductDescription, Category, which_motif) %>%
   distinct()
 write.xlsx(tab.down.reg.uniq, "../Output/toxo_cdc/ME49_59/tables/phase_based_KD_vs_WT_down_reg_motif1_motif2_occurence.xlsx")
 
 m1.v2 <- tab.down.reg %>% filter(motif %in% c("motif_1"))
 m2.v2 <- tab.down.reg %>% filter(motif %in% c( "motif_2"))
 
-ven.list <- list(motif_1 = unique(m1.v2$gene_name), motif_2 = unique(m2.v2$gene_name))
+ven.list <- list(motif_1 = unique(m1.v2$TGME49), motif_2 = unique(m2.v2$TGME49))
 p <- ggVennDiagram(ven.list, set_size = 6, label_size = 8)
 p <- p + ggtitle("down_reg") +theme(
   plot.title = element_text(size=20, face = "bold.italic", color = 'red'))
@@ -97,8 +90,9 @@ ggsave("../Output/toxo_cdc/ME49_59/figures_paper/global_KD_vs_WT_down_reg_motif1
 ## summary and bar plot
 
 HC.peaks <- tab %>% 
-  filter(intersection == "yes" & KD_vs_WT_phase_based %in% c('down_reg', 'up_reg', 'modulated') ) %>% 
-  dplyr::select(chr, start_peak, end_peak, V4, V5, V11,gene_name,intersection, KD_vs_WT_phase_based,ProductDescription.x , Category ) %>% 
+  filter(intersection_CutRun_dataSets == "yes" & KD_vs_WT_phase_based %in% c('down_reg', 'up_reg', 'modulated') ) %>% 
+  dplyr::select(chr, start_peak, end_peak, V4, V5, V6,TGME49,intersection_CutRun_dataSets,
+                KD_vs_WT_phase_based,ProductDescription , Category ) %>% 
   distinct()
 names(HC.peaks)[9] <- "dir"
 
@@ -166,24 +160,20 @@ ggsave("../Output/toxo_cdc/ME49_59/figures_paper/High_Conf_CutRun_peaks_phase_ba
 ####################################################
 
 ## KD vs WT global 
-tab <- readRDS("../Input/toxo_cdc/rds_ME49_59/cut_run_union_new_peaks_march_motif_modulated_genes_lfs_v4.rds")
+tab <- readRDS("../Input/toxo_cdc/rds_ME49_59/cut_run_union_new_peaks_march_motif_modulated_genes_lfs_v5.rds")
 
-DEG.peaks <- tab %>% 
-  dplyr::select(intersection, gene_name, has.motif, motif, Global_KD_vs_WT, ProductDescription.x, Category) %>%
-  filter(intersection == "yes" , has.motif == "yes"  & motif %in% c("motif_1", "motif_2")) %>% distinct() %>% na.omit()
-
-KD.vs.WT.glob <- tab %>% dplyr::select(gene_name, Global_KD_vs_WT) %>% 
+KD.vs.WT.glob <- tab %>% dplyr::select(TGME49, Global_KD_vs_WT) %>% 
   filter(Global_KD_vs_WT != "NA") %>% distinct()
 dim(KD.vs.WT.glob)
 
-intrsct.peaks  <- tab %>% dplyr::select(gene_name, intersection) %>% 
-  distinct() %>% filter(intersection == "yes")
+intrsct.peaks  <- tab %>% dplyr::select(TGME49, intersection_CutRun_dataSets) %>% 
+  distinct() %>% filter(intersection_CutRun_dataSets == "yes")
 dim(intrsct.peaks)
 
 ## overlap - venn
 DEGs <- KD.vs.WT.glob
-venn.list <- list(KD.vs.WT = unique(DEGs$gene_name), 
-                  High.Conf.Peaks = intrsct.peaks$gene_name)
+venn.list <- list(KD.vs.WT = unique(DEGs$TGME49), 
+                  High.Conf.Peaks = intrsct.peaks$TGME49)
 
 p <- ggVennDiagram(venn.list, set_size = 6, label_size = 8) 
 p
@@ -218,11 +208,11 @@ dev.off()
 ## mitifs summary 
 ## global
 tab.down.reg <- tab %>% 
-  dplyr::select(intersection, gene_name, has.motif, motif, Global_KD_vs_WT, ProductDescription.x, Category) %>%
-  filter(intersection == "yes" , has.motif == "yes" & Global_KD_vs_WT == "down_reg" & motif %in% c("motif_1", "motif_2")) %>% distinct()
+  dplyr::select(intersection_CutRun_dataSets, TGME49, has.motif, motif, Global_KD_vs_WT, ProductDescription, Category) %>%
+  filter(intersection_CutRun_dataSets == "yes" , has.motif == "yes" & Global_KD_vs_WT == "down_reg" & motif %in% c("motif_1", "motif_2")) %>% distinct()
 
 
-tab.down.reg <- tab.down.reg %>% group_by(gene_name) %>% mutate(motif.list = list(motif)) 
+tab.down.reg <- tab.down.reg %>% group_by(TGME49) %>% mutate(motif.list = list(motif)) 
 tab.down.reg <- tab.down.reg %>% rowwise() %>%
   mutate(which_motif = ifelse(length(unlist(motif.list)) > 1 , "both" , "one")) %>% distinct()
 
@@ -230,17 +220,17 @@ ind.one <- which(tab.down.reg$which_motif == "one")
 tab.down.reg$which_motif[ind.one] <- tab.down.reg$motif[ind.one]
 
 tab.sum <- tab.down.reg %>% group_by(which_motif, Category, Global_KD_vs_WT) %>% 
-  summarise(genes = list(unique(gene_name)), total = length(unique(gene_name)))
+  summarise(genes = list(unique(TGME49)), total = length(unique(TGME49)))
 
 tab.down.reg.uniq <- tab.down.reg %>%
-  dplyr::select(gene_name, has.motif, Global_KD_vs_WT, ProductDescription.x, Category, which_motif) %>%
+  dplyr::select(TGME49, has.motif, Global_KD_vs_WT, ProductDescription, Category, which_motif) %>%
   distinct()
 write.xlsx(tab.down.reg.uniq, "../Output/toxo_cdc/ME49_59/tables/global_KD_vs_WT_down_reg_motif1_motif2_occurence.xlsx")
 
 m1.v2 <- tab.down.reg %>% filter(motif %in% c("motif_1"))
 m2.v2 <- tab.down.reg %>% filter(motif %in% c( "motif_2"))
 
-ven.list <- list(motif_1 = unique(m1.v2$gene_name), motif_2 = unique(m2.v2$gene_name))
+ven.list <- list(motif_1 = unique(m1.v2$TGME49), motif_2 = unique(m2.v2$TGME49))
 p <- ggVennDiagram(ven.list, set_size = 6, label_size = 8)
 p <- p + ggtitle("down_reg") +theme(
   plot.title = element_text(size=20, face = "bold.italic", color = 'red'))
@@ -252,8 +242,9 @@ ggsave("../Output/toxo_cdc/ME49_59/figures_paper/global_KD_vs_WT_down_reg_motif1
 
 # global bar plot 
 HC.peaks <- tab %>% 
-  filter(intersection == "yes" & Global_KD_vs_WT %in% c('down_reg', 'up_reg') ) %>% 
-  dplyr::select(chr, start_peak, end_peak, V4, V5, V11,gene_name,intersection, Global_KD_vs_WT,ProductDescription.x , Category ) %>% 
+  filter(intersection_CutRun_dataSets == "yes" & Global_KD_vs_WT %in% c('down_reg', 'up_reg') ) %>% 
+  dplyr::select(chr, start_peak, end_peak, V4, V5, V6,TGME49,intersection_CutRun_dataSets, 
+                Global_KD_vs_WT,ProductDescription , Category ) %>% 
   distinct()
 names(HC.peaks)[9] <- "dir"
 
@@ -353,15 +344,17 @@ tab <- readRDS("../Input/toxo_cdc/rds_ME49_59/cut_run_union_new_peaks_march_moti
 
 # phase based 
 HC.peaks <- tab %>% 
-  filter(intersection == "yes" & KD_vs_WT_phase_based %in% c('down_reg', 'up_reg', 'modulated') ) %>% 
-  dplyr::select(chr, start_peak, end_peak, V4, V5, V11,gene_name,intersection, KD_vs_WT_phase_based,ProductDescription.x , Category ) %>% 
+  filter(intersection_CutRun_dataSets == "yes" & KD_vs_WT_phase_based %in% c('down_reg', 'up_reg', 'modulated') ) %>% 
+  dplyr::select(chr, start_peak, end_peak, V4, V5, V6,TGME49,intersection_CutRun_dataSets, 
+                KD_vs_WT_phase_based,ProductDescription , Category ) %>% 
   distinct()
 names(HC.peaks)[9] <- "dir"
 
 # global
 HC.peaks <- tab %>% 
-  filter(intersection == "yes" & Global_KD_vs_WT %in% c('down_reg', 'up_reg') ) %>% 
-  dplyr::select(chr, start_peak, end_peak, V4, V5, V11,gene_name,intersection, Global_KD_vs_WT,ProductDescription.x , Category ) %>% 
+  filter(intersection_CutRun_dataSets == "yes" & Global_KD_vs_WT %in% c('down_reg', 'up_reg') ) %>% 
+  dplyr::select(chr, start_peak, end_peak, V4, V5, V6,TGME49,intersection_CutRun_dataSets,
+                Global_KD_vs_WT,ProductDescription , Category ) %>% 
   distinct()
 names(HC.peaks)[9] <- "dir"
 
@@ -378,7 +371,7 @@ cluster.bed.list <- lapply(1:length(HC.peaks.list), function(i){
   bed.name <- paste(names(HC.peaks.list)[i], paste(DEG.type, ".bed", sep = ""), sep = "_")
   fasta.name <- paste(names(HC.peaks.list)[i], paste(DEG.type, ".fasta", sep = ""), sep = "_")
   tmp <- HC.peaks.list[[i]] 
-  cluster.bed <- tmp %>% select(chr, start_peak, end_peak ,V5 ,  V11, gene_name,  dir)
+  cluster.bed <- tmp %>% select(chr, start_peak, end_peak ,V5 ,  V6, TGME49,  dir)
   
   write.table(cluster.bed, paste(out.dir, bed.name, sep = ""), sep = "\t", quote = F, row.names = F, col.names = F)
   write.xlsx(cluster.bed, paste(out.dir, gsub('.bed', '.xlsx', bed.name), sep = "") )
