@@ -221,7 +221,7 @@ trans.list <- lapply(1:length(rna.trans.marker.genes.list), function(i) {
 })
 
 names(trans.list) <- names(rna.trans.marker.genes.list)
-saveRDS(trans.list,"../Input/toxo_cdc/rds_ME49_59/rna_markers_rna_transitions_dtw_3_clust_list.rds" )
+#saveRDS(trans.list,"../Input/toxo_cdc/rds_ME49_59/rna_markers_rna_transitions_dtw_3_clust_list.rds" )
 
 trans.list <- readRDS("../Input/toxo_cdc/rds_ME49_59/rna_markers_rna_transitions_dtw_clust_list.rds")
 names(trans.list) <- c("T1", "T2", "T3", "T4")
@@ -274,6 +274,8 @@ plot_rna_atac_trends.ord <- function(sc.rna.sc.atac.joint.long.sub){
   
 }
 
+
+## order the rna clusters manually according to their peaks
 
 rna.trans.marker.genes.list <- readRDS("../Input/toxo_cdc/rds_ME49_59/rna_markers_rna_transitions_dtw_clust_list.rds")
 rna.trans.data.list <- lapply(rna.trans.marker.genes.list, "[[", 1)
