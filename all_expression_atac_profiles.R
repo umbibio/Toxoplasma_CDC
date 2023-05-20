@@ -178,20 +178,22 @@ sc.atac.spline.fits <- readRDS('../Input/toxo_cdc/rds_ME49_59/sc_atac_spline_fit
 
 ## table of genes of interest
 ## cut and run intersection and global KD vs WT
-tab <- readRDS("../Input/toxo_cdc/rds_ME49_59/cut_run_union_new_peaks_march_motif_modulated_genes_lfs_v4.rds")
-names(tab)[1] <- "chr"
+tab <- readRDS("../Input/toxo_cdc/rds_ME49_59/cut_run_union_new_peaks_march_motif_modulated_genes_lfs_v5.rds")
+names(tab) <- gsub("TGME49", "gene_name", names(tab))
 
 ## global 
 tab <- tab %>% 
-  filter(intersection == "yes" & Global_KD_vs_WT %in% c('down_reg', 'up_reg', 'modulated') ) %>% 
-  dplyr::select(chr, start_peak, end_peak, V4, V5, V11,gene_name,intersection, Global_KD_vs_WT, ProductDescription.x , Category ) %>% 
+  filter(intersection_CutRun_dataSets == "yes" & Global_KD_vs_WT %in% c('down_reg', 'up_reg', 'modulated') ) %>% 
+  dplyr::select(chr, start_peak, end_peak, V4, V5, V6,gene_name,intersection_CutRun_dataSets, Global_KD_vs_WT,
+                ProductDescription , Category ) %>% 
   distinct()
 names(tab)[9] <- "dir"
 
 ## phase based 
 tab <- tab %>% 
-  filter(intersection == "yes" & KD_vs_WT_phase_based %in% c('down_reg', 'up_reg', 'modulated') ) %>% 
-  dplyr::select(chr, start_peak, end_peak, V4, V5, V11,gene_name,intersection, KD_vs_WT_phase_based, ProductDescription.x , Category ) %>% 
+  filter(intersection_CutRun_dataSets == "yes" & KD_vs_WT_phase_based %in% c('down_reg', 'up_reg', 'modulated') ) %>% 
+  dplyr::select(chr, start_peak, end_peak, V4, V5, V6,gene_name,intersection_CutRun_dataSets, 
+                KD_vs_WT_phase_based, ProductDescription , Category ) %>% 
   distinct()
 names(tab)[9] <- "dir"
 
@@ -216,12 +218,13 @@ plot_trends("TGME49-227600",sc.rna.spline.fits, sc.atac.spline.fits)
 
 ## table of genes of interest
 ## cut and run intersection and phase based KD vs WT 
-tab <- readRDS("../Input/toxo_cdc/rds_ME49_59/cut_run_union_new_peaks_march_motif_modulated_genes_lfs_v4.rds")
-names(tab)[1] <- "chr"
+tab <- readRDS("../Input/toxo_cdc/rds_ME49_59/cut_run_union_new_peaks_march_motif_modulated_genes_lfs_v5.rds")
+names(tab) <- gsub("TGME49", "gene_name", names(tab))
 
 HC.peaks <- tab %>% 
-  filter(intersection == "yes" & KD_vs_WT_phase_based %in% c('down_reg', 'up_reg', 'modulated') ) %>% 
-  dplyr::select(chr, start_peak, end_peak, V4, V5, V11,gene_name,intersection, KD_vs_WT_phase_based,ProductDescription.x , Category ) %>% 
+  filter(intersection_CutRun_dataSets == "yes" & KD_vs_WT_phase_based %in% c('down_reg', 'up_reg', 'modulated') ) %>% 
+  dplyr::select(chr, start_peak, end_peak, V4, V5, V6,gene_name,intersection_CutRun_dataSets,
+                KD_vs_WT_phase_based,ProductDescription , Category ) %>% 
   distinct()
 names(HC.peaks)[9] <- "dir"
 

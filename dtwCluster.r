@@ -391,8 +391,8 @@ p
 ggsave('../Output/toxo_cdc/ME49_59/figures_paper/High_conf_peaks_down_reg_Global_KD_vs_WT_2_clust.pdf', 
        plot = p, width = 6, height = 6, dpi = 300)
 
-HC.peaks.clust.df <- HC.peaks.clust %>% dplyr::select(GeneID, Name, cluster.RNA) %>% distinct()
-write.xlsx(HC.peaks.clust.df, "../Output/toxo_cdc/ME49_59/tables/High_conf_peaks_down_reg_Global_KD_vs_WT_2_clust.xlsx")
+HC.peaks.clust.df.down <- HC.peaks.clust %>% dplyr::select(GeneID, Name, cluster.RNA) %>% distinct()
+write.xlsx(HC.peaks.clust.df.down, "../Output/toxo_cdc/ME49_59/tables/High_conf_peaks_down_reg_Global_KD_vs_WT_2_clust.xlsx")
 
 
 # up-reg
@@ -420,8 +420,11 @@ p
 ggsave('../Output/toxo_cdc/ME49_59/figures_paper/High_conf_peaks_up_reg_Global_KD_vs_WT_2_clust.pdf', 
        plot = p, width = 6, height = 6, dpi = 300)
 
-HC.peaks.clust.df <- HC.peaks.clust %>% dplyr::select(GeneID, Name, cluster.RNA) %>% distinct()
+HC.peaks.clust.df.up <- HC.peaks.clust %>% dplyr::select(GeneID, Name, cluster.RNA) %>% distinct()
 write.xlsx(HC.peaks.clust.df, "../Output/toxo_cdc/ME49_59/tables/High_conf_peaks_up_reg_Global_KD_vs_WT_2_clust.xlsx")
+
+
+up.down.global <- rbind(HC.peaks.clust.df.up, HC.peaks.clust.df.down)
 
 
 ## ribosomals (which are only present in down-reg list)

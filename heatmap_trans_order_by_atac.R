@@ -199,6 +199,9 @@ ggsave(filename="../Output/toxo_cdc/ME49_59/figures_paper/cyclic_genes_heatmaps_
 )
 
 
+saveRDS(sc.rna.mu.scale, '../Input/toxo_cdc/rds_ME49_59/sc_rna_spline_mu_scale_rna_trans_ord_by_atac.rds')
+saveRDS(sc.atac.mu.scale, '../Input/toxo_cdc/rds_ME49_59/sc_atac_spline_mu_scale_atac_trans_ord_by_atac.rds')
+
 # new version
 sc.rna.mu.scale$data <- "scRNA"
 #sc.rna.mu.scale$peak.ord.rna <- sc.rna.mu.scale$peak.ord

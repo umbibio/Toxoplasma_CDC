@@ -865,6 +865,8 @@ ss.rna <- ss.rna %>%
     newcolor = ifelse(grepl("hypo", Category), alpha(Color, .5), Color)
   ) 
 sum(ss.rna$num.DEG)
+
+saveRDS(ss.rna, "../Input/toxo_cdc/rds_ME49_59/rna_markers_rna_trns_sig_v2_sum_plt.rds")
 p <- ggplot(ss.rna, aes(cluster, num.DEG)) +
   geom_col(aes(fill = I(newcolor), color = Category),
            position = position_stack(reverse = FALSE),
@@ -1000,6 +1002,9 @@ names(tss.df) <-  motif.name
 tss.df.all <- Reduce("rbind", tss.df) 
 
 tss.df.all <- tss.df.all %>% filter(!motif =="T3.motif.10" ) # not a significant motif
+tss.df.all$motif <- gsub("T4.motif.11", "T4.motif.10", tss.df.all$motif)
+
+saveRDS(tss.df.all, "../Input/toxo_cdc/rds_ME49_59/motif_dist_from_TSS_plt.rds")
 
 p <- ggplot(tss.df.all, aes(x = tss.dist)) + 
   geom_histogram(aes(y = ..density..),

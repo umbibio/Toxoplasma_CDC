@@ -477,6 +477,7 @@ rownames(all.peaks.filt.df) <- NULL
 all.peaks.filt.df <- all.peaks.filt.df %>% transmute(V1 = V1, V2 = V2, V3 = V3, V4 = V4) 
 cut.run.peaks <- all.peaks.filt.df 
 
+saveRDS(cut.run.peaks, "../Input/toxo_cdc/rds_ME49_59/CutRunPeaks.rds")
 #  atac peaks (before peak gene assignments)
 
 Tg_ATAC <- readRDS('../Input/toxo_cdc/rds_ME49_59/S.O_ATAC_peak.rds')
@@ -493,7 +494,7 @@ peak.genes.bed.merged.bed <- peaks.all.sort.atac
 # overlap atac and cut RUN
 options(bedtools.path = "/Users/kourosh.zarringhalam/miniconda3/bin/")
 peak.cutRun.atac.ovrlp <- bedtoolsr::bt.intersect(a = cut.run.peaks, b = peak.genes.bed.merged.bed, wb = T)
-
+saveRDS(peak.cutRun.atac.ovrlp, "../Input/toxo_cdc/rds_ME49_59/atac_cut_run_overlap.rds")
 
 library(VennDiagram)
 pdf(file = "../Output/toxo_cdc/ME49_59/figures_paper/cut_run_union_peaks_overlap_atac_peaks_venn_v2.pdf",

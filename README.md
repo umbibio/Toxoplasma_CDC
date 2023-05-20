@@ -55,16 +55,20 @@ AP2XII-8 KD
   note: all figures and tables for downstream analysis of cut&run and DEGs(KD_vs_WT) has been    done in this script. PowerPoint CutRUN_DEGs_V4_05_05_23 analysis 
 
 
-13. Dynamic time Warping clustering of gene sets - dtw_clustering.R
-  This script takes genes and cluster them and plot the rna and atac profiles according to the   cluster. 
+13. Dynamic time Warping clustering of gene sets - dtw_clustering_rna_tran_new.R
+    This script takes genes and cluster them and plot the rna and atac profiles according to the               cluster.  (ordered rna clusters)
   
+
+13. Dynamic time Warping clustering of gene sets - dtw_clusters_cutRun_DEGs_new.R
+
+
 14. all_expression_atac_profiles.R 
 
-  If we dont want to cluster the expression or accessibility curves, we can use this script to   plot the expression and accessibility of a gene set. 
+  If we dont want to cluster the expression or accessibility curves, we can use this script to  plot the expression and accessibility of a gene set. 
 
 15. GO_enrichment_new.R
 
-  takes the output of toxodb enrichment analsys process the tables and plot the top rankes GO    terms. 
+  takes the output of toxodb enrichment analsys process the tables and plot the top rankes GO terms. 
   
 16. sc_expr_plot.R - plots rna expression of KD and WT + violin plots for each each gene 
 

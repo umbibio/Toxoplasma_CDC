@@ -33,6 +33,7 @@ peaks.all.sort <- peak.regions.bed  %>% dplyr::select(X1, X3, X4) %>%  arrange(X
 names(peaks.all.sort) <- c("V1", "V2", "V3")
 peaks.all.sort$V4 <- paste(paste(peaks.all.sort$V1, peaks.all.sort$V2, sep = ":"),peaks.all.sort$V3 ,sep = "-" )
 
+saveRDS(peaks.all.sort, "../Input/toxo_cdc/rds_ME49_59/atac_peaks.rds")
 
 #### gtf file 
 

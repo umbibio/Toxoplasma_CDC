@@ -139,3 +139,15 @@ for (i in 1: length(files)){
   write.xlsx(tab, paste(in.dir, paste(files[i], "desc.xlsx", sep = "_") , sep = ""))
   
 }
+
+in.dir <- "../OutPut/toxo_cdc/ME49_59/tables/atac_clusters_within_rna_tran_dtw_clusters_manual/"
+files <-  list.files(in.dir, "desc.xlsx")
+
+tab.list <- list()
+tab.list <- lapply(1:length(files), function(i){
+  
+  tab <- read.xlsx(paste(in.dir, files[i], sep = ""))
+
+})
+tabs.all <- do.call("rbind", tab.list)
+write.xlsx(tabs.all, "../OutPut/toxo_cdc/ME49_59/tables/dtw_rna_clusters_atac_sub_clusters.xlsx")
