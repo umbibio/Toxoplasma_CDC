@@ -243,89 +243,102 @@ trans.clust.df.all.sum <- trans.clust.df.all %>%
   group_by(trans.cluster.rna) %>% summarise(genes = list(gsub("-", "_", gene_name)), total = n())
 
 
-# 
-# plot_rna_atac_trends(trans.list$T1$data)
-# T1.C1 <- trans.clust.df.all %>% filter(trans.cluster.rna == "T1_C1")
-# colnames(T1.C1) <- gsub("GeneID", "gene_name", colnames(T1.C1))
-# 
+plot_rna_atac_trends.ord <- function(sc.rna.sc.atac.joint.long.sub){
+  p  <- ggplot(sc.rna.sc.atac.joint.long.sub, aes(x= time,y=normExpr)) +
+    geom_path(aes(color = GeneID),alpha = 0.8, size = 0.8)+ 
+    theme_bw() +
+    #theme_bw(base_size = 16) +
+    theme(legend.position = "right") +
+    ylab('normExpr') + xlab('Time') +
+    theme(axis.text.x = element_text(angle = 0, hjust = 1, size = 22, face="bold", colour = "black")) +
+    theme(axis.text.y = element_text(angle = 0, hjust = 1, size = 18, face="bold", colour = "black")) +
+    theme(strip.background = element_rect(colour="black", fill="white",size=0.5, linetype="solid")) +
+    theme(strip.text = element_text(size = 22, face="bold", angle = 0)) + 
+    
+    coord_cartesian(xlim = c(0,6.5)) + 
+    facet_grid(cluster.RNA.ordered ~ data, scales = 'free', space = 'free') +
+    theme(
+      plot.title = element_text(size=20, face = "bold.italic", color = 'red'),
+      axis.title.x = element_text(size=22, face="bold", hjust = 1),
+      axis.title.y = element_text(size=22, face="bold")
+    ) + 
+    theme(#legend.position = c(0.15, 0.85),
+      legend.position = 'none',
+      legend.title = element_text(colour="black", size=12, 
+                                  face="bold"),
+      legend.text = element_text(colour="black", size=12, 
+                                 face="bold"))
+  
+  
+  return(p)
+  
+}
 
 
-trans.clust.rna.list  <- split(trans.clust.df.all, f = trans.clust.df.all$trans.cluster.rna)
-atac.list <- c()
-#i <- 2
-k <- 2
-atac.list <- lapply(1:length(trans.clust.rna.list), function(i) {
-  my.df <- trans.clust.rna.list[[i]]
-  df <- clust.atac.df(my.df, num.clust = k)
-  df$cluster.ATAC <- gsub(" ","", df$cluster.ATAC)
-  df$group <- names(trans.clust.rna.list)[i]
-  df$trans.rna.atac.clust <- paste(df$group, df$cluster.ATAC, sep = "_")
-  df <- left_join(df, prod.desc, by = "GeneID")
-  p1 <- plot_atac_trand(df) +
-    ggtitle(names(trans.clust.rna.list[i]))
+rna.trans.marker.genes.list <- readRDS("../Input/toxo_cdc/rds_ME49_59/rna_markers_rna_transitions_dtw_clust_list.rds")
+rna.trans.data.list <- lapply(rna.trans.marker.genes.list, "[[", 1)
+rna.trans.data <- do.call("rbind", rna.trans.data.list)
+
+rna.trans.data <- rna.trans.data %>% 
+  mutate(new.ord.clust = 
+           case_when(group == "T1" & cluster.RNA == "C 1" ~ "D4",
+                     group == "T1" & cluster.RNA == "C 2" ~ "D2", 
+                     group == "T1" & cluster.RNA == "C 3" ~ "D3", 
+                     group == "T1" & cluster.RNA == "C 4" ~ "D1",
+                     group == "T2" & cluster.RNA == "C 1" ~ "D4",
+                     group == "T2" & cluster.RNA == "C 2" ~ "D2", 
+                     group == "T2" & cluster.RNA == "C 3" ~ "D1", 
+                     group == "T2" & cluster.RNA == "C 4" ~ "D3", 
+                     group == "T3" & cluster.RNA == "C 1" ~ "D4",
+                     group == "T3" & cluster.RNA == "C 2" ~ "D3",
+                     group == "T3" & cluster.RNA == "C 3" ~ "D2", 
+                     group == "T3" & cluster.RNA == "C 4" ~ "D1", 
+                     group == "T4" & cluster.RNA == "C 1" ~ "D3", 
+                     group == "T4" & cluster.RNA == "C 2" ~ "D4", 
+                     group == "T4" & cluster.RNA == "C 3" ~ "D1", 
+                     group == "T4" & cluster.RNA == "C 4" ~ "D2", 
+                     TRUE ~ "NA"))
+rna.trans.data$cluster.RNA.ordered <- gsub("\\D", "C", rna.trans.data$new.ord.clust) 
+rna.trans.data$data <- factor(rna.trans.data$data, levels = c("scRNA", "scATAC"))
+rna.trans.data.list <- split(rna.trans.data, f= rna.trans.data$group)
+#saveRDS(rna.trans.data.list, "../Input/toxo_cdc/rds_ME49_59/rna_markers_rna_transitions_dtw_clust_list_ordered.rds")
+rna.trans.data.list <- readRDS("../Input/toxo_cdc/rds_ME49_59/rna_markers_rna_transitions_dtw_clust_list_ordered.rds")
+trans.plt <- c()
+trans.plt <- lapply(1:length(rna.trans.data.list), function(i) {
+  
+  my.df <- rna.trans.data.list[[i]]
+  
+  p1 <- plot_rna_atac_trends.ord(my.df) 
+  # +
+  #   ggtitle(names(rna.trans.marker.genes.list[i]))
   p1
+  #tt <- list(df, p1)
 })
 
-names(atac.list) <- names(trans.clust.rna.list)
+pp <- grid.arrange(grobs = trans.plt, ncol = 2)
 
-saveRDS(atac.list, "../Input/toxo_cdc/rds_ME49_59/atac_dtw_clust.rds")
-atac.list <- readRDS("../Input/toxo_cdc/rds_ME49_59/atac_dtw_clust.rds")
-
-pp2 <- grid.arrange(grobs = atac.list, ncol = 4)
-ggsave( "../Output/toxo_cdc/ME49_59/figures_paper/atac_clust_V2.pdf",
-        plot = pp2,height = 13,width = 24, dpi = 300)
+ggsave( "../Output/toxo_cdc/ME49_59/figures_paper/rna_markers_rna_transitions_dtw_clust_list_ordered.pdf", 
+        plot = pp,
+        height = 16,width = 16, dpi = 300)
 
 
-atac <- lapply(atac.list, "[[", 1)
-atac.df <- do.call("rbind", atac)
-atac.df$gene_name <- gsub("-", "_", atac.df$GeneID)
-atac.df <- atac.df %>% select(gene_name, trans.rna.atac.clust) %>% 
-  group_by(trans.rna.atac.clust) %>% distinct() %>% mutate(total = n())
-atac.df.list <- split(atac.df, f = atac.df$trans.rna.atac.clust)
-
-out.dir <- "../Output/toxo_cdc/ME49_59/tables/atac_clusters_within_rna_tran_dtw_clusters/"
-lapply(1:length(atac.df.list), function(i){
-  
-  tab <- atac.df.list[i]
- 
-  name.file<- paste(names(atac.df.list)[i], ".xlsx", sep = "")
-  
-  write.xlsx(tab, paste(out.dir, name.file))
-  
-})
-
-
-# atac.summ <- atac.df %>% select(gene_name,trans.rna.atac.clust ) %>% distinct() %>%
-#   group_by(trans.rna.atac.clust) %>% summarise(genes = list(unique(gene_name)), total = n())
-
-# write.xlsx(atac.summ, "../Output/toxo_cdc/ME49_59/tables/atac_clusters_within_rna_tran_dtw_clusters.xlsx")
-# tmp <- df %>% dplyr::select(GeneID, cluster.ATAC, ProductDescription) %>% distinct()
-# tmp$GeneID <- gsub("-", "_", tmp$GeneID)
-# # write.xlsx(tmp, "../Output/toxo_cdc/tabels/atac_T1C1.xlsx")
-
-
-trans.list <- readRDS("../Input/toxo_cdc/rds_ME49_59/rna_markers_rna_transitions_dtw_clust_list.rds")
-names(trans.list) <- c("T1", "T2", "T3", "T4")
-
-# pp <- grid.arrange(grobs = trans.list[1], ncol = 1)
-# ggsave( "../Output/toxo_cdc/ME49_59/figures_paper/rna_markers_rna_transitions_dtw_4_clust_list.pdf",
-#         plot = pp,height = 18,width = 16, dpi = 300)
-
-
-i <- 1
-df <- trans.list[[i]][["data"]]
-df$group <- names(trans.list)[i]
-df$data <- factor(df$data, levels = c("scRNA", "scATAC"))
-df$cluster.RNA <- gsub(" ", "", df$cluster.RNA)
-#df$cluster.RNA <- factor(df$cluster.RNA, levels = c("C4", "C2", "C3", "C1")) # T1
-#df$cluster.RNA <- factor(df$cluster.RNA, levels = c("C3", "C2", "C4", "C1")) # T2
-#df$cluster.RNA <- factor(df$cluster.RNA, levels = c("C4", "C3", "C2", "C1")) # T3
-df$cluster.RNA <- factor(df$cluster.RNA, levels = c("C3", "C4", "C1", "C2")) # T3
-p1 <- plot_rna_atac_trends(df) +
-  ggtitle(names(rna.trans.marker.genes.list[i]))
+p1 <-trans.plt[[1]]
 p1
-  
-
-
-ggsave( "../Output/toxo_cdc/ME49_59/figures_paper/T4_rna_clust_ordered.pdf",
+ggsave( "../Output/toxo_cdc/ME49_59/figures_paper/T1_rna_clust_ordered.pdf",
         plot = p1,height = 8,width = 10, dpi = 300)
+p2 <-trans.plt[[2]]
+p2
+ggsave( "../Output/toxo_cdc/ME49_59/figures_paper/T2_rna_clust_ordered.pdf",
+        plot = p2,height = 8,width = 10, dpi = 300)
+
+p3 <-trans.plt[[3]]
+p3
+ggsave( "../Output/toxo_cdc/ME49_59/figures_paper/T3_rna_clust_ordered.pdf",
+        plot = p3,height = 8,width = 10, dpi = 300)
+
+p4 <-trans.plt[[4]]
+p4
+ggsave( "../Output/toxo_cdc/ME49_59/figures_paper/T4_rna_clust_ordered.pdf",
+        plot = p4,height = 8,width = 10, dpi = 300)
+
+
