@@ -72,9 +72,9 @@ num.cores <- detectCores(all.tests = FALSE, logical = TRUE)
 #        width = 6, height = 6, dpi = 300)
 
 ## Pseudo time
-sc.rna.genes.expr.pt <- readRDS('../Input/toxo_cdc/rds_ME49_59/sc_rna_genes_expr_pt.rds')
-S.O.rna  <- readRDS('../Input/toxo_cdc/rds_ME49_59/S.O_intra_lables_pt.rds')
-rna.sds.data <- readRDS('../Input/toxo_cdc/rds_ME49_59/sc_rna_sds_data.rds')
+sc.rna.genes.expr.pt <- readRDS('../Input_YR/toxo_cdc/rds_ME49_59/sc_rna_genes_expr_pt.rds')
+S.O.rna  <- readRDS('../Input_YR/toxo_cdc/rds_ME49_59/S.O_intra_lables_pt.rds')
+rna.sds.data <- readRDS('../Input_YR/toxo_cdc/rds_ME49_59/sc_rna_sds_data.rds')
 
 
 L <- wiskerPlot(S.O.rna)
@@ -229,7 +229,7 @@ p
 
 
 
-ggsave(filename="../Output/toxo_cdc/ME49_59/figures_paper/umap_intra_density.pdf",
+ggsave(filename="../Output_YR/toxo_cdc/ME49_59/figures_paper/umap_intra_density.pdf",
        plot=p,
        width = 6, height = 6,
        units = "in", # other options are "in", "cm", "mm"
@@ -985,6 +985,7 @@ FeaturePlot(S.O.extra, "TGGT1-250800", split.by = 'orig.ident',
 VlnPlot(S.O.extra,"TGGT1-250800")
 
 
+
 ## distribution of motifs in each transition relative to TSS
 tss.df <- readRDS("../Input/toxo_cdc/rds_ME49_59/motif_dist_from_TSS.rds")
 motif.name <- c(paste("T1.motif", 1:3, sep = "."), 
@@ -1037,7 +1038,7 @@ ggsave(plot = p , "../Output/toxo_cdc/ME49_59/figures_paper/motifs_dist_tss.pdf"
 
 
 ## clustering genes in each rna transition that have each of motifs 
-genes.with.motif <- readRDS("../Input/toxo_cdc/rds_ME49_59/motif_genes_dtw_clust_df_plot_new_strandness.rds")
+genes.with.motif <- readRDS("../Input_YR/toxo_cdc/rds_ME49_59/motif_genes_dtw_clust_df_plot_new_strandness.rds")
 
 genes.with.motif.list <- lapply(genes.with.motif, "[[", 1) 
 #genes.with.motif.list <- genes.with.motif.list[-10]
@@ -1093,3 +1094,51 @@ ggsave("../Output/toxo_cdc/ME49_59/figures_paper/genes_with_motif_cluster_rna_ne
 
 
 
+
+## KZ
+# 3D plot - pca rna
+S.O.AP2XII8.KD <- readRDS('../Input_YR/toxo_cdc/rds_ME49_59/S.O.rna.AP2XII8.KD.new_transferred_lables_bootroyed.rds')
+pca.data <- FetchData(object = S.O.AP2XII8.KD, vars = c("PC_1", "PC_2", "PC_3", "UMAP_1", "UMAP_2", "UMAP_3", "phase"))
+pca.data$phase <- factor(pca.data$phase, levels = c("G1.a", "G1.b", "S", "M", "C"))
+
+fig1 <- plot_ly(pca.data, x = ~UMAP_1, y = ~UMAP_2, z = ~UMAP_3, color =  pca.data$phase, 
+               colors = c("#b6232a",'#ed7202', '#caae05', '#6f883a', '#b138ee'))
+fig1 <- fig1 %>% add_markers(size = 0.4)
+fig1 <- fig1 %>% layout(scene = list(xaxis = list(title = 'UMAP_1'),
+                                   yaxis = list(title = 'UMAP_2'),
+                                   zaxis = list(title = 'UMAP_3')))
+
+fig1
+
+S.O.WT <- readRDS('../Input_YR/toxo_cdc/rds_ME49_59/S.O.intra_lables.rds')
+pca.data.WT <- FetchData(object = S.O.WT, vars = c("PC_1", "PC_2", "PC_3", "UMAP_1", "UMAP_2", "UMAP_3", "phase"))
+pca.data.WT$phase <- factor(pca.data.WT$phase, levels = c("G1.a", "G1.b", "S", "M", "C"))
+
+fig2 <- plot_ly(pca.data.WT, x = ~UMAP_1, y = ~UMAP_2, z = ~UMAP_3, color =  pca.data.WT$phase, 
+                colors = c("#b6232a",'#ed7202', '#caae05', '#6f883a', '#b138ee'))
+fig2 <- fig2 %>% add_markers(size = 0.4)
+fig2 <- fig2 %>% layout(scene = list(xaxis = list(title = 'UMAP_1'),
+                                     yaxis = list(title = 'UMAP_2'),
+                                     zaxis = list(title = 'UMAP_3')))
+
+fig2
+
+
+# custom grid style
+axx <- list(
+  gridcolor='rgb(255, 255, 255)',
+  zerolinecolor='rgb(255, 255, 255)',
+  showbackground=TRUE,
+  backgroundcolor='rgb(230, 230,230)'
+)
+
+fig <- subplot(fig1, fig2) 
+fig <- fig %>% layout(title = "3D Subplots",
+                      scene = list(domain=list(x=c(0,1),y=c(0,1)),
+                                   xaxis=axx, yaxis=axx, zaxis=axx,
+                                   aspectmode='cube'),
+                      scene2 = list(domain=list(x=c(1,2),y=c(1,2)),
+                                    xaxis=axx, yaxis=axx, zaxis=axx,
+                                    aspectmode='cube'))
+
+fig

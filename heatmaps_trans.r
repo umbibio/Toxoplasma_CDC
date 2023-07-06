@@ -57,11 +57,11 @@ getCurvePeakLoc <- function(t, y, prob = 0.8){
 }
 
 
-sc.rna.spline.fits <- readRDS('../Input/toxo_cdc/rds_ME49_59/sc_rna_spline_fits_all_genes.rds')
-sc.atac.spline.fits <- readRDS('../Input/toxo_cdc/rds_ME49_59/sc_atac_spline_fits_all_genes.rds')
+sc.rna.spline.fits <- readRDS('../Input_YR//toxo_cdc/rds_ME49_59/sc_rna_spline_fits_all_genes.rds')
+sc.atac.spline.fits <- readRDS('../Input_YR//toxo_cdc/rds_ME49_59/sc_atac_spline_fits_all_genes.rds')
 
 
-marker.genes <- readRDS('../Input/toxo_cdc/rds_ME49_59/Intra_markers_sig.rds')
+marker.genes <- readRDS('../Input_YR//toxo_cdc/rds_ME49_59/Intra_markers_sig.rds')
 rna.trans.marker.genes <- marker.genes
 
 #rna.trans.marker.genes <- readRDS('../Input/toxo_cdc/rds_ME49_59/rna_markers_rna_trns_sig_v2.rds')
@@ -167,6 +167,7 @@ p2 <- ggplot(sc.atac.mu.scale, aes(x = x, y = GeneID, fill = expr)) +
     axis.title.y = element_text(size=20, face="bold"),
     legend.position = "none") + ylab('')
 
+
 plot(p2)
 
 
@@ -175,6 +176,21 @@ pp
 ggsave(filename="../Output/toxo_cdc/ME49_59/figures_paper/cyclic_genes_heatmaps_rna_atac_ord_by_peak_expr.png",
        plot=pp,
        width = 6, height = 8,
+       units = "in", # other options are "in", "cm", "mm"
+       dpi = 300
+)
+
+
+ggsave(filename="../Output_KZ/figures/cyclic_genes_heatmaps_rna_ord_by_peak_expr.png",
+       plot=p1,
+       width = 3, height = 8,
+       units = "in", # other options are "in", "cm", "mm"
+       dpi = 300
+)
+
+ggsave(filename="../Output_KZ/figures/cyclic_genes_heatmaps_atac_ord_by_peak_expr.png",
+       plot=p2,
+       width = 3, height = 8,
        units = "in", # other options are "in", "cm", "mm"
        dpi = 300
 )

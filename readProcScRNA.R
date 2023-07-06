@@ -61,7 +61,7 @@ S.O <- subset(x = S.O.intra, downsample = 8000)
 S.O <- prep_S.O(S.O, res = 0.4)
 DimPlot(S.O)
 
-saveRDS(S.O, "../Input/toxo_cdc/rds_ME49_59/S.O.rna.WT.rds")
+saveRDS(S.O, "../Input_KZ/toxo_cdc/rds_ME49_59/S.O.rna.WT.rds")
 
 ############################################################
 
@@ -70,7 +70,7 @@ S.O.list <- list(intra = S.O.intra)
 ## Individually process the data and transfer labels
 ## here we have only one data set
 ## Boothroyed data
-S.O.tg.boothroyd <- readRDS('../Input/toxo_cdc/rds_ME49_59/S.O.tg_RH_boothroyd.rds')
+S.O.tg.boothroyd <- readRDS('../Input_YR/toxo_cdc/rds_ME49_59/S.O.tg_RH_boothroyd.rds')
 
 ## split the data, process each, transfer the lables
 S.Os <- mclapply(S.O.list, function(S.O){
@@ -91,7 +91,7 @@ S.Os <- lapply(1:length(S.Os), function(i){
 })
 
 
-saveRDS(S.Os[[1]], '../Input/toxo_cdc/rds_ME49_59/S.O.intra_lables.rds')
+saveRDS(S.Os[[1]], '../Input_KZ/toxo_cdc/rds_ME49_59/S.O.intra_lables.rds')
 
 ## plot 
 Idents(S.Os[[1]]) <- 'phase'
@@ -111,8 +111,3 @@ p <- DimPlot(S.Os[[1]], reduction = "pca",
 
 
 p <- plot(p)+ ggtitle("scRNA")
-
-pca = tmp[["pca"]]
-eigValues = (pca@stdev)^2  ## EigenValues
-varExplained = eigValues / sum(eigValues)
-sum(varExplained)

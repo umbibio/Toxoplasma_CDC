@@ -18,7 +18,7 @@ source('./util_funcs.R')
 num.cores <- detectCores(all.tests = FALSE, logical = TRUE)
 
 ## Count files AP2XII-8 KD
-intra.file.csv <- "../Input/toxo_scRNA_AP2XII8_KD_230327/AP2XII8_KD.expr.csv"
+intra.file.csv <- "../Input_YR/toxo_scRNA_AP2XII8_KD_230327/AP2XII8_KD.expr.csv"
 
 ## IDs
 prod.desc  <- read.xlsx('../Input/toxo_genomics/genes/ProductDescription_GT1.xlsx')
@@ -68,7 +68,7 @@ S.O.list <- mclapply(S.O.list, function(S.O){
 
 ## transfer labels from Bootroyed
 
-S.O.tg.boothroyd <- readRDS('../Input/toxo_cdc/rds_ME49_59/S.O.tg_RH_boothroyd.rds')
+S.O.tg.boothroyd <- readRDS('../Input_YR/toxo_cdc/rds_ME49_59/S.O.tg_RH_boothroyd.rds')
 
 ## split the data, process each, transfer the lables (here we have only one data)
 S.Os <- mclapply(S.O.list, function(S.O){
@@ -94,11 +94,11 @@ DimPlot(S.Os[[1]], reduction = "pca")
 DimPlot(S.Os[[1]], reduction = "umap")
 
 
-saveRDS(S.Os[[1]], '../Input/toxo_cdc/rds_ME49_59/S.O.rna.AP2XII8.KD.new_transferred_lables_bootroyed_TGGT1.rds')
+saveRDS(S.Os[[1]], '../Input_KZ/toxo_cdc/rds_ME49_59/S.O.rna.AP2XII8.KD.new_transferred_lables_bootroyed_TGGT1.rds')
 
 
 # convert TGGT1 IDs to ME49
-S.O <- readRDS('../Input/toxo_cdc/rds_ME49_59/S.O.rna.AP2XII8.KD.new_transferred_lables_bootroyed_TGGT1.rds')
+S.O <- readRDS('../Input_YR/toxo_cdc/rds_ME49_59/S.O.rna.AP2XII8.KD.new_transferred_lables_bootroyed_TGGT1.rds')
 prod.desc  <- read.xlsx('../Input/toxo_genomics/genes/ProductDescription_GT1.xlsx')
 TGGT1_ME49 <- read.xlsx('../Input/toxo_genomics/Orthologs/TGGT1_ME49 Orthologs.xlsx')
 
@@ -120,7 +120,7 @@ DimPlot(S.O.KD, reduction = 'pca')
 S.O.KD@reductions$pca@cell.embeddings[,2] <- -1 * S.O.KD@reductions$pca@cell.embeddings[,2]
 S.O.KD@reductions$umap@cell.embeddings[,2] <- -1 * S.O.KD@reductions$umap@cell.embeddings[,2]
 
-saveRDS(S.O.KD, '../Input/toxo_cdc/rds_ME49_59/S.O.rna.AP2XII8.KD.new_transferred_lables_bootroyed.rds')
+saveRDS(S.O.KD, '../Input_KZ/toxo_cdc/rds_ME49_59/S.O.rna.AP2XII8.KD.new_transferred_lables_bootroyed.rds')
 
 pca = S.O.KD[["pca"]]
 eigValues = (pca@stdev)^2  ## EigenValues
@@ -132,7 +132,7 @@ sum(varExplained)
 ## rna-WT with already transferred lables from bootroyed will be used as reference 
 ## for integration of WT and KD
 
-S.O <- readRDS('../Input/toxo_cdc/rds_ME49_59/S.O.intra_lables.rds')
+S.O <- readRDS('../Input_KZ/toxo_cdc/rds_ME49_59/S.O.intra_lables.rds')
 prod.desc  <- read.xlsx('../Input/toxo_genomics/genes/ProductDescription_GT1.xlsx')
 TGGT1_ME49 <- read.xlsx('../Input/toxo_genomics/Orthologs/TGGT1_ME49 Orthologs.xlsx')
 
@@ -156,6 +156,6 @@ DimPlot(S.O.ref, reduction = 'umap',
 #S.O.ref@reductions[["umap"]]@cell.embeddings[,2] <- -S.O.ref@reductions[["umap"]]@cell.embeddings[,2]
 
 
-saveRDS(S.O.ref, "../Input/toxo_cdc/rds_ME49_59/S.O.rna.WT_labels.rds")
+saveRDS(S.O.ref, "../Input_KZ/toxo_cdc/rds_ME49_59/S.O.rna.WT_labels.rds")
 
 DimPlot(S.O.ref)

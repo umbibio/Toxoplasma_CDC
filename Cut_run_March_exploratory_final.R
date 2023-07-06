@@ -340,7 +340,7 @@ ggsave("../Output/toxo_cdc/ME49_59/figures_paper/High_Conf_CutRun_peaks_global_D
 ## write fasta file (cut and run regions) for high conf peaks 
 ## write the genes in excel file for GO term analysis on toxodb
 ###############################################################
-tab <- readRDS("../Input/toxo_cdc/rds_ME49_59/cut_run_union_new_peaks_march_motif_modulated_genes_lfs_v4.rds")
+tab <- readRDS("../Input_YR//toxo_cdc/rds_ME49_59/cut_run_union_new_peaks_march_motif_modulated_genes_lfs_v4.rds")
 
 # phase based 
 HC.peaks <- tab %>% 

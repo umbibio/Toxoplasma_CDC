@@ -28,7 +28,7 @@ library(Seurat)
 source('./util_funcs.R')
 
 ## Read scRAN-Seq data and convert TGGT1 Ids to TGME49
-S.O <- readRDS('../Input/toxo_cdc/rds_ME49_59/S.O.intra_lables.rds')
+S.O <- readRDS('../Input_KZ/toxo_cdc/rds_ME49_59/S.O.intra_lables.rds')
 
 ## IDs
 prod.desc  <- read.xlsx('../Input/toxo_genomics/genes/ProductDescription_GT1.xlsx')
@@ -92,7 +92,7 @@ isCircular(tx_trans) <- rep(F, length(isCircular(tx_trans)))
 
 seqinfo(tx_trans)
 
-saveRDS(tx_trans, "../Input/toxo_cdc/rds_ME49_59/ME49_tx_trans_granges.rds")
+saveRDS(tx_trans, "../Input_KZ/toxo_cdc/rds_ME49_59/ME49_tx_trans_granges.rds")
 
 ## Now read scATAC data from cellranger 
 counts <- Read10X_h5(filename = "../Input/toxo_scATAC_MJ_ME49_59/filtered_peak_bc_matrix.h5")
@@ -105,7 +105,7 @@ metadata <- read.csv(
 metadata.filt <- metadata
 metadata.filt$Sample <- rownames(metadata.filt)
 metadata.filt <- metadata.filt[metadata.filt$Sample %in% colnames(counts), ]
-peak_anno <- read_tsv("../Input/toxo_scATAC_MJ_ME49_59/filtered_peak_bc_matrix/peaks.bed", col_names = c('Chr', 'strt', 'stp'))
+peak_anno <- read_tsv("../Input_YR/toxo_scATAC_MJ_ME49_59/filtered_peak_bc_matrix/peaks.bed", col_names = c('Chr', 'strt', 'stp'))
 
 chrom_assay <- CreateChromatinAssay(
   counts = counts,
@@ -197,8 +197,8 @@ S.O.ATAC <- NormalizeData(
   scale.factor = median(S.O.ATAC$nCount_RNA)
 )
 
-saveRDS(S.O.ATAC, '../Input/toxo_cdc/rds_ME49_59/S.O_ATAC_not_integrated_not_down_samples.rds')
-S.O.ATAC <- readRDS( '../Input/toxo_cdc/rds_ME49_59/S.O_ATAC_not_integrated_not_down_samples.rds')
+saveRDS(S.O.ATAC, '../Input_KZ/toxo_cdc/rds_ME49_59/S.O_ATAC_not_integrated_not_down_samples.rds')
+S.O.ATAC <- readRDS( '../Input_KZ/toxo_cdc/rds_ME49_59/S.O_ATAC_not_integrated_not_down_samples.rds')
 
 
 ## integrate with scRNA
@@ -264,7 +264,7 @@ plot(p)
 
 
 
-saveRDS(S.O.integrated, '../Input/toxo_cdc/rds_ME49_59/S.O.intra_atac_integrated.rds')
+saveRDS(S.O.integrated, '../Input_KZ/toxo_cdc/rds_ME49_59/S.O.intra_atac_integrated.rds')
 
 ## new
 Tg_ATAC[['RNA']] <- CreateAssayObject(counts = gene.activities)

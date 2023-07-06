@@ -33,7 +33,7 @@ getGOtab <- function(dir) {
 ## transition color ####
 ########################
 
-in.dir <- '../Output/toxo_cdc/ME49_59/tables/rna_sig_markers_rna_trans_sum_GO_toxodb_OutPut/'
+in.dir <- '../Output_YR/toxo_cdc/ME49_59/tables/rna_sig_markers_rna_trans_sum_GO_toxodb_OutPut/'
 all.clust.items <- getGOtab(dir  = in.dir)
 write.xlsx(all.clust.items, '../Output/toxo_cdc/ME49_59/tables/all_GO/rna_sig_markers_rna_trans_GO_term.xlsx')
 
@@ -77,7 +77,7 @@ ggsave(filename="../Output/toxo_cdc/ME49_59/figures_paper/rna_sig_markers_rna_tr
 ##############################
 ## rna transition markers cluster based ##
 ##############################
-in.dir <- '../Output/toxo_cdc/ME49_59/tables/rna_sig_markers_rna_trans_clust_based_sum/'
+in.dir <- '../Output_YR/toxo_cdc/ME49_59/tables/rna_sig_markers_rna_trans_clust_based_sum/'
 all.clust.items <- getGOtab(dir  = in.dir)
 all.clust.items$group <- gsub("C[0-9]","", all.clust.items$cluster)
 all.clust.items$cluster.RNA <-   gsub("T[0-9]","", all.clust.items$cluster)
@@ -117,7 +117,7 @@ filtered.Go <- filtered.Go %>% arrange(cluster2, Benjamini) %>% distinct() %>%
 filtered.Go$ID <- factor(filtered.Go$ID, level=unique(filtered.Go$ID))
 filtered.Go$Name <- factor(filtered.Go$Name, level=rev(unique(filtered.Go$Name)))
 filtered.Go <- filtered.Go %>%  arrange(cluster2, Benjamini)
-write.xlsx(filtered.Go, '../Output/toxo_cdc/ME49_59/tables/all_GO/rna_sig_markers_rna_trans_clust_based_GO_term_filt_ordered_clust.xlsx')
+write.xlsx(filtered.Go, '../Output_YR/toxo_cdc/ME49_59/tables/all_GO/rna_sig_markers_rna_trans_clust_based_GO_term_filt_ordered_clust.xlsx')
 
 
 # transition color clust based
@@ -134,8 +134,8 @@ p <- ggplot(filtered.Go, aes(x = cluster2, y = Name,fill = cluster2, color = clu
                                'T4C1' = '#8f139f', 'T4C2' = '#8f139f', 'T4C3' = '#8f139f', 'T4C4' = '#8f139f')) +
   #scale_colour_gradient(limits=c(0, 0.01), low="red") +
   ylab(NULL) + xlab(NULL) + 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10, face="bold", colour = "black")) + 
-  theme(axis.text.y = element_text(angle = 0, hjust = 1, size = 10, face="bold", colour = "black")) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 12, face="bold", colour = "black")) + 
+  theme(axis.text.y = element_text(angle = 0, hjust = 1, size = 14, face="bold", colour = "black")) +
   #theme(legend.position="none") +
   theme(strip.background = element_rect(colour="black", fill="white", 
                                         size=0.5, linetype="solid")) + guides(color = FALSE)+
@@ -145,9 +145,9 @@ p <- ggplot(filtered.Go, aes(x = cluster2, y = Name,fill = cluster2, color = clu
   theme(axis.title = element_text(size = 14, colour = "black", face = "bold"))
 
 plot(p)
-ggsave(filename="../Output/toxo_cdc/ME49_59/figures_paper/rna_sig_markers_rna_trans_clust_based_GO_term_ordered_clust.pdf",
+ggsave(filename="../Output_YR//toxo_cdc/ME49_59/figures_paper/rna_sig_markers_rna_trans_clust_based_GO_term_ordered_clust.pdf",
        plot=p ,
-       width = 10, height = 10,
+       width = 8, height = 10,
        units = "in", # other options are "in", "cm", "mm"
        dpi = 300
 )
@@ -157,7 +157,7 @@ ggsave(filename="../Output/toxo_cdc/ME49_59/figures_paper/rna_sig_markers_rna_tr
 #################################################
 ### cut&run and global/phase based DEGs #########
 #################################################
-in.dir <- '../Input/toxo_cdc/cutNrun/all_macs2_old_new_batch_NO_Filter/BAMM_analysis/HighConfPeaks/GO/' ## phase based
+in.dir <- '../Input_YR//toxo_cdc/cutNrun/all_macs2_old_new_batch_NO_Filter/BAMM_analysis/HighConfPeaks/GO/' ## phase based
 all.clust.items <- getGOtab(dir  = in.dir)
 write.xlsx(all.clust.items, '../Output/toxo_cdc/ME49_59/tables/all_GO/HighConfPeaks_phase_based_DEG.xlsx')
 
@@ -169,7 +169,7 @@ filtered.Go <- all.clust.items %>% arrange(cluster, Benjamini) %>% distinct() %>
 filtered.Go$cluster <- factor(filtered.Go$cluster, levels = sort(unique(filtered.Go$cluster)))
 filtered.Go$ID <- factor(filtered.Go$ID, level=unique(filtered.Go$ID))
 filtered.Go$Name <- factor(filtered.Go$Name, level = rev(unique(filtered.Go$Name)))
-write.xlsx(filtered.Go, '../Output/toxo_cdc/ME49_59/tables/all_GO/HighConfPeaks_phase_based_DEG_filt.xlsx')
+write.xlsx(filtered.Go, '../Output_YR/toxo_cdc/ME49_59/tables/all_GO/HighConfPeaks_phase_based_DEG_filt.xlsx')
 
 p <- ggplot(filtered.Go, aes(x = cluster, y = Name)) + 
   geom_point(aes(colour = cluster, size =  -log(Benjamini))) +
@@ -178,8 +178,8 @@ p <- ggplot(filtered.Go, aes(x = cluster, y = Name)) +
   scale_fill_manual(values = c("downReg" = "#6565bf","upReg" ='#ee5d6c'))+
   #scale_colour_gradient(limits=c(0, 0.01), low="red") +
   ylab(NULL) + xlab(NULL) + 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10, face="bold")) + 
-  theme(axis.text.y = element_text(angle = 0, hjust = 1, size = 10, face="bold")) +
+  theme(axis.text.x = element_text(angle = 0, hjust = 1, size = 12, face="bold")) + 
+  theme(axis.text.y = element_text(angle = 0, hjust = 1, size = 12, face="bold")) +
   #theme(legend.position="none") +
   theme(strip.background = element_rect(colour="black", fill="white", 
                                         size=0.5, linetype="solid")) + guides(color = FALSE)+
@@ -189,9 +189,9 @@ p <- ggplot(filtered.Go, aes(x = cluster, y = Name)) +
 
 plot(p)
 
-ggsave(filename="../Output/toxo_cdc/ME49_59/tables/all_GO/HighConfPeaks_phase_based_DEG_GO_term.pdf",
+ggsave(filename="../Output_YR/toxo_cdc/ME49_59/figures_paper/HighConfPeaks_phase_based_DEG_GO_term.pdf",
        plot=p ,
-       width = 8, height = 8,
+       width = 7, height = 10,
        units = "in", # other options are "in", "cm", "mm"
        dpi = 300
 )

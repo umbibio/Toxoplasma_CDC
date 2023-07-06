@@ -13,11 +13,12 @@ TGGT1_ME49 <- read.xlsx('../Input/toxo_genomics/Orthologs/TGGT1_ME49 Orthologs.x
 prod.desc <- left_join(prod.desc, TGGT1_ME49, by = c('GeneID' = 'TGGT1'))
 
 
-atac_sub <- readRDS('../Input/toxo_cdc/rds_ME49_59/S.O_intra_atac_lables_pt.rds')
-rna_sub <- readRDS('../Input/toxo_cdc/rds_ME49_59/S.O_intra_lables_pt.rds')
+atac_sub <- readRDS('../Input_KZ//toxo_cdc/rds_ME49_59/S.O_intra_atac_lables_pt.rds')
+rna_sub <- readRDS('../Input_KZ//toxo_cdc/rds_ME49_59/S.O_intra_lables_pt.rds')
 
 ### Differential gene expression
 Idents(rna_sub) <- 'phase'
+DefaultAssay(rna_sub) <- 'RNA'
 Intra.markers <- FindAllMarkers(object = rna_sub, only.pos = T, min.pct = 0)
 
 Intra.markers$GeneID <- gsub('-', '_', Intra.markers$gene)
@@ -30,9 +31,38 @@ FeaturePlot(object = rna_sub,
 Intra.markers.sig <- Intra.markers %>% dplyr::filter(avg_log2FC > log2(1.5) & p_val_adj < 0.05)
 ss <- Intra.markers.sig %>% group_by(cluster) %>% summarise(num.DEG = n())
 
-saveRDS(Intra.markers.sig, '../Input/toxo_cdc/rds_ME49_59/Intra_markers_sig.rds')
+saveRDS(Intra.markers.sig, '../Input_KZ//toxo_cdc/rds_ME49_59/Intra_markers_sig.rds')
 
 
+## SI figure 1?
+phase.cols <- c('#b7222a', '#ee7202', '#caae05', '#70883a', '#b138ee')
+p <- ggplot(data=ss, aes(x=cluster, y=num.DEG, fill = cluster)) +
+  geom_bar(stat="identity")+
+  geom_text(aes(label=num.DEG), vjust=1.6, color="black", size=8, fontface="bold")+
+  theme_minimal() + 
+  scale_fill_manual(values = phase.cols) + 
+  ylab('DEGs') + xlab('') +
+  theme(axis.text.x = element_text(angle = 0, hjust = 1, size = 16, face="bold", color = "black")) +
+  theme(axis.text.y = element_text(angle = 0, hjust = 1, size = 16, face="bold", color= "black")) +
+  theme(strip.background = element_rect(colour="black", fill="white",
+                                        size=0.5, linetype="solid")) +
+  theme(legend.position = 'None',
+    plot.title = element_text(size=18, face = "bold.italic", color = 'black'),
+    axis.title.x = element_text(size=18, face="bold", hjust = 1),
+    axis.title.y = element_text(size=18, face="bold")
+  ) 
+
+p <- plot(p) + ggtitle("scRNA-seq markers - phase-based")
+
+p
+ggsave(filename="../Output_KZ/figures/intra_DEGs_phases.pdf",
+       plot=p,
+       width = 6, height = 6,
+       units = "in", # other options are "in", "cm", "mm"
+       dpi = 300
+)
+
+sum(ss$num.DEG)
 ###################################################
 ## marker analysis using inferred transition points 
 ###################################################
@@ -59,6 +89,7 @@ write.xlsx(rna.sig.markers.rna.trans, '../Output/toxo_cdc/ME49_59/tables/rna_mar
 
 ss.rna <- rna.sig.markers.rna.trans %>% group_by(cluster) %>% summarise(num.DEG = n())
 sum(ss.rna$num.DEG)
+
 
 ss.rna$cluster <- factor(ss.rna$cluster, levels = c('T1', 'T2', 'T3', 'T4'))
 p <- ggplot(data=ss.rna, aes(x=cluster, y=num.DEG)) +

@@ -26,13 +26,13 @@ TGGT1_ME49 <- read.xlsx('../Input/toxo_genomics/Orthologs/TGGT1_ME49 Orthologs.x
 
 ## scDATA
 
-rna_sub <- readRDS('../Input/toxo_cdc/rds_ME49_59/S.O_intra_lables_pt.rds')
-atac_sub <- readRDS('../Input/toxo_cdc/rds_ME49_59/S.O_intra_atac_lables_pt.rds')
+rna_sub <- readRDS('../Input_KZ//toxo_cdc/rds_ME49_59/S.O_intra_lables_pt.rds')
+atac_sub <- readRDS('../Input_KZ//toxo_cdc/rds_ME49_59/S.O_intra_atac_lables_pt.rds')
 
 
 ## Splines
-sc.rna.spline.fits <- readRDS('../Input/toxo_cdc/rds_ME49_59/sc_rna_spline_fits_all_genes.rds')
-sc.atac.spline.fits <- readRDS('../Input/toxo_cdc/rds_ME49_59/sc_atac_spline_fits_all_genes.rds')
+sc.rna.spline.fits <- readRDS('../Input_KZ/toxo_cdc/rds_ME49_59/sc_rna_spline_fits_all_genes.rds')
+sc.atac.spline.fits <- readRDS('../Input_KZ//toxo_cdc/rds_ME49_59/sc_atac_spline_fits_all_genes_1.2.rds')
 
 ## Turn the data into wide format (time by gene) and center & scale each gene
 sc.rna.dtw.wide <- sc.rna.spline.fits %>% 
@@ -103,8 +103,46 @@ plot_trends <- function(my.GeneID){
 
 
 
-gene <- "TGME49_288720"
-gene <- gsub("_", "-",gene)
+gene <- "TGME49-283900"
+gene <- 'TGME49-232970'
+#gene <- gsub("_", "-",gene)
 p <- plot_trends(gene)
 p
 
+
+
+stats.cyclic.AP2 <- stats %>% dplyr::filter(rna.cyclic == 1 & grepl("AP2 domain transcription factor", ProductDescription))
+AP2s.c <- stats.cyclic.AP2$GeneID
+
+for(i in 1:length(unique(sc.rna.sc.atac.joint.long$GeneID))){
+  gene <- unique(sc.rna.sc.atac.joint.long$GeneID)[i]
+  p <- plot_trends(gene)
+  Sys.sleep(0.6)
+  
+}
+
+
+
+
+regs <- read.xlsx('../Input/toxo_cdc/gene_families/regulatory_toxo.xlsx')
+regs <- left_join(regs, stats, by = c('GeneID' = 'GeneID.y'))
+cyclic.regs <- regs %>% dplyr::filter(rna.cyclic == 1)
+
+DefaultAssay(rna_sub) <- 'RNA'
+x <- FetchData(rna_sub, vars = cyclic.regs$GeneID.y)
+dim(x)
+
+
+library(ggfortify)
+df <- t(x)
+
+vars <- apply(df, 2, sd)
+rm.ind <- which(vars == 0)
+df <- df[,-rm.ind]
+pca_res <- prcomp(df, scale. = TRUE)
+
+df <- as.data.frame(df)
+df$GeneID <- gsub('-1', '', gsub('\\.', '-', rownames(df)))
+df$class <- regs$Family[match(df$GeneID, regs$GeneID.y)]
+
+autoplot(pca_res, data = df, colour = 'class', label = F, label.size = 3)

@@ -147,18 +147,18 @@ plot_atac_trand <- function(sc.atac.long.clust){
 source('./util_funcs.R')
 
 ## IDs
-prod.desc  <- read.xlsx('../Input/toxo_genomics/genes/ProductDescription_GT1.xlsx')
+prod.desc  <- read.xlsx('../Input_YR//toxo_genomics/genes/ProductDescription_GT1.xlsx')
 TGGT1_ME49 <- read.xlsx('../Input/toxo_genomics/Orthologs/TGGT1_ME49 Orthologs.xlsx')
 
 ## scDATA
 
-rna_sub <- readRDS('../Input/toxo_cdc/rds_ME49_59/S.O_intra_lables_pt.rds')
-atac_sub <- readRDS('../Input/toxo_cdc/rds_ME49_59/S.O_intra_atac_lables_pt.rds')
+rna_sub <- readRDS('../Input_YR//toxo_cdc/rds_ME49_59/S.O_intra_lables_pt.rds')
+atac_sub <- readRDS('../Input_YR//toxo_cdc/rds_ME49_59/S.O_intra_atac_lables_pt.rds')
 
 
 ## Splines
-sc.rna.spline.fits <- readRDS('../Input/toxo_cdc/rds_ME49_59/sc_rna_spline_fits_all_genes.rds')
-sc.atac.spline.fits <- readRDS('../Input/toxo_cdc/rds_ME49_59/sc_atac_spline_fits_all_genes.rds')
+sc.rna.spline.fits <- readRDS('../Input_YR//toxo_cdc/rds_ME49_59/sc_rna_spline_fits_all_genes.rds')
+sc.atac.spline.fits <- readRDS('../Input_YR//toxo_cdc/rds_ME49_59/sc_atac_spline_fits_all_genes.rds')
 
 ## Turn the data into wide format (time by gene) and center & scale each gene
 sc.rna.dtw.wide <- sc.rna.spline.fits %>% 
@@ -191,12 +191,12 @@ sc.atac.mu.scale <- sc.atac.dtw.wide %>%
 ## 
 
 
-rna.trans.marker.genes <- readRDS('../Input/toxo_cdc/rds_ME49_59/rna_markers_rna_trns_sig_v2.rds')
+rna.trans.marker.genes <- readRDS('../Input_YR//toxo_cdc/rds_ME49_59/rna_markers_rna_trns_sig_v2.rds')
 rna.trans.marker.genes <- rna.trans.marker.genes %>% transmute(GeneID = gene, phase = cluster) %>% distinct()
 rna.trans.marker.genes %>% group_by(phase) %>% summarise(n())
 
-prod.desc  <- read.xlsx('../Input/toxo_genomics/genes/ProductDescription_GT1.xlsx')
-TGGT1_ME49 <- read.xlsx('../Input/toxo_genomics/Orthologs/TGGT1_ME49 Orthologs.xlsx')
+prod.desc  <- read.xlsx('../Input_YR//toxo_genomics/genes/ProductDescription_GT1.xlsx')
+TGGT1_ME49 <- read.xlsx('../Input_YR//toxo_genomics/Orthologs/TGGT1_ME49 Orthologs.xlsx')
 prod.desc <- left_join(prod.desc, TGGT1_ME49, by = c("GeneID" = "TGGT1"))
 prod.desc <- prod.desc %>% 
   transmute(GeneID = gsub("_", "-", TGME49), ProductDescription = ProductDescription) %>% na.omit()
@@ -223,7 +223,7 @@ trans.list <- lapply(1:length(rna.trans.marker.genes.list), function(i) {
 names(trans.list) <- names(rna.trans.marker.genes.list)
 #saveRDS(trans.list,"../Input/toxo_cdc/rds_ME49_59/rna_markers_rna_transitions_dtw_3_clust_list.rds" )
 
-trans.list <- readRDS("../Input/toxo_cdc/rds_ME49_59/rna_markers_rna_transitions_dtw_clust_list.rds")
+trans.list <- readRDS("../Input_YR//toxo_cdc/rds_ME49_59/rna_markers_rna_transitions_dtw_clust_list.rds")
 names(trans.list) <- c("T1", "T2", "T3", "T4")
 
 pp <- grid.arrange(grobs = trans.list, ncol = 2)
@@ -277,7 +277,7 @@ plot_rna_atac_trends.ord <- function(sc.rna.sc.atac.joint.long.sub){
 
 ## order the rna clusters manually according to their peaks
 
-rna.trans.marker.genes.list <- readRDS("../Input/toxo_cdc/rds_ME49_59/rna_markers_rna_transitions_dtw_clust_list.rds")
+rna.trans.marker.genes.list <- readRDS("../Input_YR//toxo_cdc/rds_ME49_59/rna_markers_rna_transitions_dtw_clust_list.rds")
 rna.trans.data.list <- lapply(rna.trans.marker.genes.list, "[[", 1)
 rna.trans.data <- do.call("rbind", rna.trans.data.list)
 
@@ -303,8 +303,8 @@ rna.trans.data <- rna.trans.data %>%
 rna.trans.data$cluster.RNA.ordered <- gsub("\\D", "C", rna.trans.data$new.ord.clust) 
 rna.trans.data$data <- factor(rna.trans.data$data, levels = c("scRNA", "scATAC"))
 rna.trans.data.list <- split(rna.trans.data, f= rna.trans.data$group)
-#saveRDS(rna.trans.data.list, "../Input/toxo_cdc/rds_ME49_59/rna_markers_rna_transitions_dtw_clust_list_ordered.rds")
-rna.trans.data.list <- readRDS("../Input/toxo_cdc/rds_ME49_59/rna_markers_rna_transitions_dtw_clust_list_ordered.rds")
+saveRDS(rna.trans.data.list, "../Input_YR//toxo_cdc/rds_ME49_59/rna_markers_rna_transitions_dtw_clust_list_ordered.rds")
+rna.trans.data.list <- readRDS("../Input_YR//toxo_cdc/rds_ME49_59/rna_markers_rna_transitions_dtw_clust_list_ordered.rds")
 trans.plt <- c()
 trans.plt <- lapply(1:length(rna.trans.data.list), function(i) {
   

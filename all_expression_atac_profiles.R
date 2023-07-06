@@ -147,7 +147,7 @@ get_rna_atac_profile <- function(rna.splines, atac.splines, genes.tab, scale = T
   
   ## table of genes to plot their expression 
   tab.genes <- data.frame(TGME49 = gsub("_", "-", genes.tab$gene_name), 
-                          Name = HC.peaks$ProductDescription)
+                          Name = genes.tab$ProductDescription)
   
   
   sc.rna.long <- inner_join(sc.rna.mu.scale, tab.genes, by = c('GeneID' = 'TGME49')) 
